@@ -25,13 +25,11 @@ export default function Home() {
       <section id="hero" className="act hero">
         <span className="eyebrow">Fresh · Youthful · Bubbly</span>
         <div className="wm"><Letters text="Razzl" /></div>
-        <div className="hint">move your cursor across the word</div>
         <p className="sub serif o-l">Your World! Explore our refreshing variants.</p>
         <div className="chips" style={{ marginBottom: 6 }}>
           <RLink href="/flavours" className="btn mag">Explore flavours</RLink>
           <RLink href="/culture" className="btn ghost mag">See the culture</RLink>
         </div>
-        <div className="scrollhint">Scroll to pour ↓</div>
       </section>
 
       <section id="act2" className="act">
