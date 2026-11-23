@@ -144,6 +144,7 @@ function Bottle() {
           // Desktop bottles enter from the side they will settle on; mobile alternates sides.
           motion.inDir = Math.abs(tgt.x) > 0.15 ? Math.sign(tgt.x) : -motion.outDir;
           G.position.x = motion.inDir * (halfW + 2.1);
+          targetX = G.position.x;
           motion.rotTarget = motion.rotY + (motion.inDir > 0 ? -1 : 1) * Math.PI * 2;
           motion.mode = "in";
         }
