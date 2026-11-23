@@ -40,7 +40,21 @@ export default function Shell({ children }: { children: React.ReactNode }) {
       setTimeout(() => { router.push(href); if (S.lenis) S.lenis.scrollTo(0, { immediate: true }); else window.scrollTo(0, 0); setTimeout(() => el.classList.remove("on"), 200); }, 420);
     };
   }, [router]);
-  useEffect(() => { S.route = path; document.body.dataset.route = path; S.show = 1; }, [path]);
+  useEffect(() => {
+    S.route = path;
+    document.body.dataset.route = path;
+
+    // Clear home-page scroll and spill state before the persistent WebGL stage
+    // starts animating the newly selected route.
+    S.p = 0;
+    S.spillOn = false;
+    S.pop = 0;
+    S.burst = 0;
+    S.show = path === "/" || path === "/flavours" ? 1 : 0;
+
+    // A drag offset belongs to the flavour inspection page, not the next route.
+    if (path !== "/flavours") S.drag = 0;
+  }, [path]);
   useEffect(() => { document.body.style.overflow = open ? "hidden" : ""; if (S.lenis) { open ? S.lenis.stop() : S.lenis.start(); } }, [open]);
   useEffect(() => { // smooth scroll (Lenis) wired to GSAP ScrollTrigger
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
