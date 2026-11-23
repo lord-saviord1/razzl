@@ -82,7 +82,6 @@ function Bottle() {
     };
     return m;
   }, []);
-  const tmp = useMemo(() => new THREE.Color(), []);
 
   useFrame((st, dt) => {
     const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
@@ -149,7 +148,7 @@ function Glow() {
 
 // Large soft bokeh discs at different depths: ambient depth, not stars.
 function Bokeh() {
-  const N = 26, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
+  const N = 14, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 18, y: (Math.random() - 0.5) * 11, z: -4 + Math.random() * 6.5, s: 0.5 + Math.random() * 1.7, v: 0.0015 + Math.random() * 0.004, ph: Math.random() * 6.28 })), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, f = FL[S.flavor];
