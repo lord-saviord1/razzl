@@ -37,8 +37,16 @@ void main(){
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 1.1*q + m*0.2);
   vec3 base = vec3(0.025,0.02,0.04);
-  vec3 tint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
-  vec3 col = mix(base, tint*0.78, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.66);
+  vec3 brandRed = vec3(0.89, 0.055, 0.12);
+  vec3 brandOrange = vec3(1.0, 0.32, 0.0);
+  vec3 brandGreen = vec3(0.0, 0.65, 0.31);
+  vec3 brandYellow = vec3(1.0, 0.88, 0.0);
+  vec3 campaign = mix(brandRed, brandOrange, smoothstep(0.04, 0.62, uv.x));
+  campaign = mix(campaign, brandGreen, smoothstep(0.52, 1.0, uv.y) * 0.22);
+  campaign = mix(campaign, brandYellow, smoothstep(0.25, 0.82, uv.x) * 0.18);
+  vec3 flavourTint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
+  vec3 tint = mix(campaign, flavourTint, 0.68);
+  vec3 col = mix(base, tint*0.82, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.72);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
