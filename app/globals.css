@@ -285,3 +285,22 @@ body{color:var(--ink)}
 @media(prefers-reduced-motion:reduce){
   #menu{transition:none}
 }
+
+/* Light-surface form controls and secondary flavour selectors. */
+input,select,textarea{
+  color:var(--j-deep);
+  background:rgba(255,255,255,.78);
+  border:1px solid rgba(123,60,152,.24);
+  border-radius:4px;
+  box-shadow:0 6px 18px rgba(123,60,152,.05);
+}
+input::placeholder,textarea::placeholder{color:rgba(59,25,80,.55)}
+select option{color:#30263A;background:#FFF8EC}
+.btn.ghost:not(.mag){
+  color:var(--j-amethyst);
+  background:rgba(255,255,255,.42);
+  border:1.5px solid rgba(123,60,152,.48);
+  border-radius:4px;
+  box-shadow:none;
+}
+.btn.ghost:not(.mag):hover{color:#fff;background:var(--j-amethyst);border-color:var(--j-amethyst)}
