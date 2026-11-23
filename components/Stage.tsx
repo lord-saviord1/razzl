@@ -28,14 +28,14 @@ const softTex = () => {
 
 // Original two-pass GPU water simulation, adapted to the existing R3F renderer.
 // Pointer movement injects pressure into the simulation; it never warps the page or camera.
-const simulationVertexShader = \`
+const simulationVertexShader = `
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-\`;
-const simulationFragmentShader = \`
+`;
+const simulationFragmentShader = `
 uniform sampler2D textureA;
 uniform vec2 mouse;
 uniform vec2 resolution;
@@ -71,15 +71,15 @@ void main() {
     }
     gl_FragColor = vec4(pressure, pVel, (p_right - p_left) / 2.0, (p_up - p_down) / 2.0);
 }
-\`;
-const renderVertexShader = \`
+`;
+const renderVertexShader = `
 varying vec2 vUv;
 void main() {
     vUv = uv;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
 }
-\`;
-const renderFragmentShader = \`
+`;
+const renderFragmentShader = `
 uniform sampler2D textureA;
 uniform sampler2D textureB;
 varying vec2 vUv;
@@ -92,7 +92,7 @@ void main() {
     float specular = pow(max(0.0, dot(normal, lightDir)), 60.0) * 1.5;
     gl_FragColor = color + vec4(specular);
 }
-\`;
+`;
 
 function Atmosphere() {
   const { gl, size, pointer, scene, camera } = useThree();
