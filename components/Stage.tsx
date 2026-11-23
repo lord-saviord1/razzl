@@ -26,39 +26,173 @@ const softTex = () => {
 };
 
 
-// Custom WebGL atmosphere: domain-warped noise in the flavour colours, pointer-reactive. The CSS gradient (#amb) stays as the no-WebGL fallback.
-const atmV = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 1.0, 1.0); }`;
-const atmF = `uniform float t; uniform vec2 m; uniform vec3 c1; uniform vec3 c2; varying vec2 vUv;
-float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
-float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h(i), h(i+vec2(1.0,0.0)), f.x), mix(h(i+vec2(0.0,1.0)), h(i+vec2(1.0,1.0)), f.x), f.y); }
-float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i=0;i<5;i++){ v += a*n(p); p *= 2.02; a *= 0.5; } return v; }
-void main(){
-  vec2 uv = vUv; vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
-  vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
-  float f = fbm(p + 1.1*q + m*0.2);
-  vec3 base = vec3(0.025,0.02,0.04);
-  vec3 brandRed = vec3(0.89, 0.055, 0.12);
-  vec3 brandOrange = vec3(1.0, 0.32, 0.0);
-  vec3 brandGreen = vec3(0.0, 0.65, 0.31);
-  vec3 brandYellow = vec3(1.0, 0.88, 0.0);
-  vec3 campaign = mix(brandRed, brandOrange, smoothstep(0.04, 0.62, uv.x));
-  campaign = mix(campaign, brandGreen, smoothstep(0.52, 1.0, uv.y) * 0.22);
-  campaign = mix(campaign, brandYellow, smoothstep(0.25, 0.82, uv.x) * 0.18);
-  vec3 flavourTint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
-  vec3 tint = mix(campaign, flavourTint, 0.68);
-  vec3 col = mix(base, tint*0.82, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.72);
-  col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
-  gl_FragColor = vec4(col, 1.0);
-  #include <colorspace_fragment>
-}`;
+// Original two-pass GPU water simulation, adapted to the existing R3F renderer.
+// Pointer movement injects pressure into the simulation; it never warps the page or camera.
+const simulationVertexShader = \`
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+\`;
+const simulationFragmentShader = \`
+uniform sampler2D textureA;
+uniform vec2 mouse;
+uniform vec2 resolution;
+uniform float time;
+uniform int frame;
+varying vec2 vUv;
+const float delta = 1.4;
+void main() {
+    vec2 uv = vUv;
+    if (frame == 0) { gl_FragColor = vec4(0.0); return; }
+    vec4 data = texture2D(textureA, uv);
+    float pressure = data.x;
+    float pVel = data.y;
+    vec2 texelSize = 1.0 / resolution;
+    float p_right = texture2D(textureA, uv + vec2(texelSize.x, 0.0)).x;
+    float p_left = texture2D(textureA, uv + vec2(-texelSize.x, 0.0)).x;
+    float p_up = texture2D(textureA, uv + vec2(0.0, texelSize.y)).x;
+    float p_down = texture2D(textureA, uv + vec2(0.0, -texelSize.y)).x;
+    if (uv.x <= texelSize.x) p_left = p_right;
+    if (uv.x >= 1.0 - texelSize.x) p_right = p_left;
+    if (uv.y <= texelSize.y) p_down = p_up;
+    if (uv.y >= 1.0 - texelSize.y) p_up = p_down;
+    pVel += delta * (-2.0 * pressure + p_right + p_left) / 4.0;
+    pVel += delta * (-2.0 * pressure + p_up + p_down) / 4.0;
+    pressure += delta * pVel;
+    pVel -= 0.005 * delta * pressure;
+    pVel *= 1.0 - 0.002 * delta;
+    pressure *= 0.999;
+    vec2 mouseUV = mouse / resolution;
+    if (mouse.x > 0.0) {
+        float dist = distance(uv, mouseUV);
+        if (dist <= 0.02) pressure += 2.0 * (1.0 - dist / 0.02);
+    }
+    gl_FragColor = vec4(pressure, pVel, (p_right - p_left) / 2.0, (p_up - p_down) / 2.0);
+}
+\`;
+const renderVertexShader = \`
+varying vec2 vUv;
+void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}
+\`;
+const renderFragmentShader = \`
+uniform sampler2D textureA;
+uniform sampler2D textureB;
+varying vec2 vUv;
+void main() {
+    vec4 data = texture2D(textureA, vUv);
+    vec2 distortion = 0.3 * data.zw;
+    vec4 color = texture2D(textureB, vUv + distortion);
+    vec3 normal = normalize(vec3(-data.z * 2.0, 0.5, -data.w * 2.0));
+    vec3 lightDir = normalize(vec3(-3.0, 10.0, 3.0));
+    float specular = pow(max(0.0, dot(normal, lightDir)), 60.0) * 1.5;
+    gl_FragColor = color + vec4(specular);
+}
+\`;
+
 function Atmosphere() {
-  const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: atmV, fragmentShader: atmF, depthTest: false, depthWrite: false, uniforms: { t: { value: 0 }, m: { value: new THREE.Vector2() }, c1: { value: new THREE.Color(FL[0].hex) }, c2: { value: new THREE.Color(FL[0].hex2) } } }), []);
-  const a = useMemo(() => new THREE.Color(), []);
-  useFrame((st) => {
-    mat.uniforms.t.value = st.clock.elapsedTime; mat.uniforms.m.value.lerp(st.pointer, 0.04);
-    mat.uniforms.c1.value.lerp(a.set(FL[S.flavor].hex), 0.04); mat.uniforms.c2.value.lerp(a.set(FL[S.flavor].hex2), 0.04);
-  });
-  return (<mesh renderOrder={-100} frustumCulled={false}><planeGeometry args={[2, 2]} /><primitive object={mat} attach="material" /></mesh>);
+  const { gl, size, pointer, scene, camera } = useThree();
+  const simScene = useMemo(() => new THREE.Scene(), []);
+  const bgScene = useMemo(() => new THREE.Scene(), []);
+  const simCamera = useMemo(() => new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1), []);
+  const simMaterial = useMemo(() => new THREE.ShaderMaterial({
+    uniforms: {
+      textureA: { value: null }, mouse: { value: new THREE.Vector2() },
+      resolution: { value: new THREE.Vector2(1, 1) }, time: { value: 0 }, frame: { value: 0 },
+    },
+    vertexShader: simulationVertexShader, fragmentShader: simulationFragmentShader,
+  }), []);
+  const renderMaterial = useMemo(() => new THREE.ShaderMaterial({
+    uniforms: { textureA: { value: null }, textureB: { value: null } },
+    vertexShader: renderVertexShader, fragmentShader: renderFragmentShader,
+    depthTest: false, depthWrite: false,
+  }), []);
+  const simQuad = useMemo(() => new THREE.Mesh(new THREE.PlaneGeometry(2, 2), simMaterial), [simMaterial]);
+  const bgQuad = useMemo(() => new THREE.Mesh(new THREE.PlaneGeometry(2, 2), renderMaterial), [renderMaterial]);
+  const background = useMemo(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 512; canvas.height = 512;
+    const ctx = canvas.getContext("2d")!;
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
+    const paint = (time: number) => {
+      ctx.fillStyle = "#FBF7EF"; ctx.fillRect(0, 0, 512, 512);
+      const blobs = [
+        ["#DDE5B0", 105 + Math.sin(time * .12) * 55, 110 + Math.cos(time * .10) * 38, 330],
+        ["#E4D8EA", 390 + Math.cos(time * .09) * 48, 115 + Math.sin(time * .13) * 42, 310],
+        ["#FBE3D9", 360 + Math.sin(time * .08) * 42, 390 + Math.cos(time * .11) * 35, 320],
+        ["#D5EDF9", 100 + Math.cos(time * .10) * 38, 390 + Math.sin(time * .09) * 40, 300],
+        ["#FDD835", 255 + Math.sin(time * .07) * 70, 245 + Math.cos(time * .08) * 50, 185],
+        ["#E2552B", 440 + Math.sin(time * .06) * 20, 300 + Math.cos(time * .07) * 35, 125],
+        ["#A0B043", 65 + Math.cos(time * .06) * 24, 235 + Math.sin(time * .08) * 35, 145],
+      ] as const;
+      for (const [color, x, y, radius] of blobs) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, color); gradient.addColorStop(.58, color + "B8");
+        gradient.addColorStop(1, "rgba(251,247,239,0)");
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 512);
+      }
+      tex.needsUpdate = true;
+    };
+    paint(0);
+    return { tex, paint };
+  }, []);
+  const targets = useRef<{ a: THREE.WebGLRenderTarget; b: THREE.WebGLRenderTarget } | null>(null);
+  const frame = useRef(0);
+  const pixelRatio = Math.min(gl.getPixelRatio(), 1.5);
+  useEffect(() => {
+    const w = Math.max(1, Math.floor(size.width * pixelRatio));
+    const h = Math.max(1, Math.floor(size.height * pixelRatio));
+    const options: THREE.RenderTargetOptions = {
+      format: THREE.RGBAFormat, type: THREE.FloatType,
+      minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter,
+      stencilBuffer: false, depthBuffer: false,
+    };
+    const a = new THREE.WebGLRenderTarget(w, h, options);
+    const b = new THREE.WebGLRenderTarget(w, h, options);
+    targets.current = { a, b };
+    simMaterial.uniforms.resolution.value.set(w, h);
+    frame.current = 0;
+    return () => { a.dispose(); b.dispose(); targets.current = null; };
+  }, [gl, size.width, size.height, pixelRatio, simMaterial]);
+  useEffect(() => {
+    simScene.add(simQuad); bgScene.add(bgQuad);
+    return () => { simScene.remove(simQuad); bgScene.remove(bgQuad); };
+  }, [simScene, bgScene, simQuad, bgQuad]);
+  useEffect(() => () => {
+    simMaterial.dispose(); renderMaterial.dispose();
+    simQuad.geometry.dispose(); bgQuad.geometry.dispose(); background.tex.dispose();
+  }, [simMaterial, renderMaterial, simQuad, bgQuad, background]);
+  useFrame((state) => {
+    const pair = targets.current;
+    if (!pair) return;
+    const w = pair.a.width, h = pair.a.height;
+    simMaterial.uniforms.frame.value = frame.current++;
+    simMaterial.uniforms.time.value = state.clock.elapsedTime;
+    simMaterial.uniforms.mouse.value.set(
+      pointer.x < -1 || pointer.x > 1 ? 0 : (pointer.x * 0.5 + 0.5) * w,
+      pointer.y < -1 || pointer.y > 1 ? 0 : (pointer.y * 0.5 + 0.5) * h,
+    );
+    simMaterial.uniforms.textureA.value = pair.a.texture;
+    gl.setRenderTarget(pair.b);
+    gl.render(simScene, simCamera);
+    renderMaterial.uniforms.textureA.value = pair.b.texture;
+    renderMaterial.uniforms.textureB.value = background.tex;
+    gl.setRenderTarget(null);
+    gl.autoClear = true;
+    gl.clear();
+    gl.render(bgScene, simCamera);
+    gl.autoClear = false;
+    gl.render(scene, camera);
+    gl.autoClear = true;
+    const temp = pair.a; pair.a = pair.b; pair.b = temp;
+  }, 1);
+  return null;
 }
 
 function Bottle() {

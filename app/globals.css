@@ -180,3 +180,108 @@ button{touch-action:manipulation}
 .page p,.sec p,.panel p,.promo p,.card p{color:rgba(255,255,255,.92)}
 .page h1,.page h2,.sec h2,.panel h2,.card b,.promo h2{color:#fff}
 .chip{color:rgba(255,255,255,.94)}
+
+
+/* Jochebed-inspired final visual pass: warm, bright, organic; Razzl remains the brand. */
+:root{
+  --bg:#FBF7EF;
+  --ink:#30263A;
+  --j-amethyst:#7B3C98;
+  --j-deep:#3B1950;
+  --j-pear:#A0B043;
+  --j-sky:#0397DB;
+  --j-sun:#FDD835;
+  --j-coral:#E2552B;
+  color-scheme:light;
+}
+html,body{background:var(--bg);color:var(--ink)}
+body{color:var(--ink)}
+#amb{
+  background:
+    radial-gradient(58% 62% at 14% 14%,rgba(221,229,176,.8),transparent 74%),
+    radial-gradient(48% 58% at 88% 18%,rgba(228,216,234,.88),transparent 72%),
+    radial-gradient(56% 60% at 78% 88%,rgba(251,227,217,.82),transparent 72%),
+    radial-gradient(42% 48% at 12% 86%,rgba(213,237,249,.82),transparent 72%),
+    #FBF7EF;
+}
+#vig{display:none}
+#grain{opacity:.018}
+.o-l,.o-d{color:var(--ink)!important;-webkit-text-stroke:0!important;text-shadow:none!important}
+.page,.sec,.hero,.panel,.promo,.card{color:var(--ink)}
+.page p,.sec p,.panel p,.promo p,.card p{color:rgba(48,38,58,.88);text-shadow:none}
+.page h1,.page h2,.sec h2,.panel h2,.card b,.promo h2{color:var(--j-deep)}
+.display{color:var(--j-deep)}
+.eyebrow{color:var(--j-amethyst);background:none;border:0;padding:0;border-radius:0;backdrop-filter:none}
+.serif{color:var(--j-deep)}
+.glass{
+  background:rgba(255,255,255,.34);
+  border:0;
+  border-radius:0 34px 0 34px;
+  box-shadow:0 14px 44px rgba(123,60,152,.09);
+  backdrop-filter:blur(4px);
+  -webkit-backdrop-filter:blur(4px);
+}
+.panel.glass{background:rgba(255,248,236,.88);box-shadow:0 20px 55px rgba(59,25,80,.13)}
+.chip{color:var(--j-deep);border-color:rgba(123,60,152,.35);background:rgba(255,255,255,.4)}
+.btn.mag:not(.ghost),.btn.mag:not(.ghost):hover,.btn.mag:not(.ghost):focus-visible{
+  background:var(--brand-red);color:#fff;border:0;border-radius:4px;box-shadow:0 8px 20px rgba(227,24,43,.18)
+}
+.btn.ghost.mag{background:transparent;color:var(--j-amethyst);border:1.5px solid var(--j-amethyst);border-radius:4px}
+.btn.ghost.mag:hover{background:var(--j-amethyst);color:#fff}
+#hd{padding:calc(18px + env(safe-area-inset-top,0px)) 5vw 18px}
+#hd .logo{color:var(--j-amethyst);text-shadow:none;font-size:38px}
+#burger{
+  width:48px;height:48px;justify-content:center;gap:0;
+  border-radius:0 50% 0 50%;border:1.5px solid var(--j-amethyst);
+  background:rgba(255,255,255,.72);color:var(--j-amethyst);
+  box-shadow:0 8px 24px rgba(123,60,152,.1);backdrop-filter:blur(8px)
+}
+#burger span{background:var(--j-amethyst);box-shadow:0 5px 0 var(--j-amethyst)}
+#burger{font-size:0}
+#burger span{display:block}
+#menu{
+  align-items:center;justify-content:center;
+  padding:calc(88px + env(safe-area-inset-top,0px)) 8vw calc(34px + env(safe-area-inset-bottom,0px));
+  background:var(--j-deep);color:#FFF8EC;
+  clip-path:circle(0% at calc(100% - 42px) 42px);
+  transition:clip-path .8s cubic-bezier(.22,1,.36,1),visibility .8s;
+}
+#menu.open{clip-path:circle(150% at calc(100% - 42px) 42px)}
+#menu nav{
+  width:min(880px,100%);
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  gap:clamp(8px,1.6vh,18px)
+}
+.ml{
+  width:100%;display:flex;align-items:baseline;gap:18px;
+  padding:clamp(3px,.6vh,8px) 0;
+  border-bottom:1px solid rgba(255,248,236,.16);
+  color:#FFF8EC;-webkit-text-stroke:0;paint-order:normal;
+  font:800 clamp(30px,5.2vw,66px)/1.02 var(--f-body);
+  letter-spacing:-.045em;text-transform:none;
+  opacity:0;transform:translateY(24px);
+}
+#menu.open .ml{opacity:1;transform:none}
+.ml i{width:28px;color:var(--j-pear);font-size:12px;letter-spacing:.12em}
+.ml:hover{color:var(--j-sun);-webkit-text-stroke:0}
+#veil{background:rgba(59,25,80,.22);backdrop-filter:blur(6px)}
+#ft{
+  background:rgba(255,248,236,.78);
+  border-top:1px solid rgba(123,60,152,.14);
+  color:var(--j-deep)
+}
+.ft-logo{color:var(--j-amethyst);text-shadow:none}
+.ft-say,.ft-copy,.ft-cols a,.ft-cols span,.ft-cols b,.ft-small{color:var(--j-deep);text-shadow:none}
+.ft-copy,.ft-cols a,.ft-cols span{opacity:.9}
+.ft-cols a:hover{color:var(--j-coral)}
+/* Let the organic atmosphere show through: remove the heavy glass-card treatment. */
+.card.glass,.promo.glass{background:rgba(255,255,255,.28);border:0;box-shadow:none;backdrop-filter:none}
+@media(max-width:800px){
+  #hd .logo{font-size:34px}
+  #menu{align-items:center;padding-left:7vw;padding-right:7vw}
+  #menu nav{gap:10px}
+  .ml{font-size:clamp(30px,8vw,48px);padding:7px 0}
+}
+@media(prefers-reduced-motion:reduce){
+  #menu{transition:none}
+}
