@@ -162,3 +162,21 @@ button{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+
+/* Brand and readability correction: solid campaign colours, never gradient CTAs. */
+.btn.mag:not(.ghost),
+.btn.mag:not(.ghost):hover,
+.btn.mag:not(.ghost):focus-visible{
+  background:var(--brand-red);
+  color:#fff;
+  box-shadow:0 8px 22px rgba(227,24,43,.22);
+}
+.btn.mag:not(.ghost):active{background:#C91225}
+.btn.ghost.mag{background:rgba(255,255,255,.075);color:#fff}
+.o-d{color:#fff!important;-webkit-text-stroke:0!important;paint-order:normal}
+.o-l{color:#fff!important;-webkit-text-stroke:0!important;paint-order:normal}
+.page,.sec,.hero,.panel,.promo,.card{color:#fff}
+.page p,.sec p,.panel p,.promo p,.card p{color:rgba(255,255,255,.92)}
+.page h1,.page h2,.sec h2,.panel h2,.card b,.promo h2{color:#fff}
+.chip{color:rgba(255,255,255,.94)}
