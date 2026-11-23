@@ -1,7 +1,8 @@
 "use client";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
+import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { useEffect, useMemo, useRef } from "react";
 import { FL, S, emit, setFlavor } from "@/lib/store";
 import { createCrispRazzlLabel } from "@/lib/label";
@@ -36,8 +37,16 @@ void main(){
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 1.1*q + m*0.2);
   vec3 base = vec3(0.025,0.02,0.04);
-  vec3 tint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
-  vec3 col = mix(base, tint*0.78, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.66);
+  vec3 brandRed = vec3(0.89, 0.055, 0.12);
+  vec3 brandOrange = vec3(1.0, 0.32, 0.0);
+  vec3 brandGreen = vec3(0.0, 0.65, 0.31);
+  vec3 brandYellow = vec3(1.0, 0.88, 0.0);
+  vec3 campaign = mix(brandRed, brandOrange, smoothstep(0.04, 0.62, uv.x));
+  campaign = mix(campaign, brandGreen, smoothstep(0.52, 1.0, uv.y) * 0.22);
+  campaign = mix(campaign, brandYellow, smoothstep(0.25, 0.82, uv.x) * 0.18);
+  vec3 flavourTint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
+  vec3 tint = mix(campaign, flavourTint, 0.68);
+  vec3 col = mix(base, tint*0.82, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.72);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -54,6 +63,14 @@ function Atmosphere() {
 
 function Bottle() {
   const g = useRef<THREE.Group>(null!), mesh = useRef<THREE.Mesh>(null!), mouth = useRef<THREE.Object3D>(null!);
+  const { gl, scene } = useThree();
+  const flavorMotion = useRef({ last: -1, mode: "idle" as "idle" | "out" | "in", pending: 0, outDir: 1, inDir: 1, omega: 0, rotY: 0, rotTarget: 0 });
+  useEffect(() => {
+    const pmrem = new THREE.PMREMGenerator(gl);
+    const environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    scene.environment = environment;
+    return () => { scene.environment = null; environment.dispose(); pmrem.dispose(); };
+  }, [gl, scene]);
   const gl: any = useGLTF("/models/bottle.glb");
   const geo = useMemo(() => { let m: any; gl.scene.traverse((o: any) => { if (o.isMesh && !m) m = o; }); return m.geometry as THREE.BufferGeometry; }, []);
   const labels = useMemo(() => FL.map((f) => createCrispRazzlLabel(f.key)), []);
@@ -62,7 +79,7 @@ function Bottle() {
   const uni = useMemo(() => ({ uLab: { value: labels[0] }, uLiq: { value: cols.liq }, uCap: { value: cols.cap },
     uFill: { value: 0.33 }, uCapY: { value: 0.4 }, uLab0: { value: 0.0 }, uLab1: { value: 0.19 } }), []);
   const mat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({ roughness: 0.22, metalness: 0.05, transparent: true });
+    const m = new THREE.MeshPhysicalMaterial({ roughness: 0.19, metalness: 0.015, clearcoat: 0.88, clearcoatRoughness: 0.12, envMapIntensity: 0.9, transparent: true });
     m.onBeforeCompile = (sh) => {
       Object.assign(sh.uniforms, uni);
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vObj;")
@@ -89,35 +106,73 @@ function Bottle() {
     // Frame-rate independent easing keeps the model's motion consistent across devices.
     const ease = 1 - Math.exp(-dt * 7.5);
     const hideEase = 1 - Math.exp(-dt * 16);
-    let tz = -0.1, tgt = { x: 0, y: 0, s: 1.1, show: 1 };
+    let tz = -0.1, tgt = { x: 0, y: 0, s: 1.15, show: 1 };
     if (route === "/") {
       const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
       tz = -ang * DEG; setFlavor(flavor);
       tgt = { x: mob ? 0 : Math.min(2.35, halfW * 0.55), y: mob ? 0.9 : 0, s: 1.1, show: S.show };
-    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.8 : 0.1, s: 1.32, show: 1 };
+    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.8 : 0.1, s: 1.38, show: 1 };
     else tgt.show = 0;
     S.pop = Math.max(0, S.pop - dt * 0.9); tz -= Math.sin(S.pop * Math.PI) * 1.9;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
     const targetYaw = route === "/flavours" ? t * 0.28 + S.drag : t * 0.38 + Math.sin(t * 0.7) * 0.16 + S.mx * 0.28;
-    G.rotation.y = damp(G.rotation.y, targetYaw, ease);
+    const fi = S.flavor, motion = flavorMotion.current;
+    const applyFlavour = (index: number) => {
+      const f = FL[index];
+      cols.liq.set(f.liq); cols.cap.set(f.cap); uni.uLab.value = labels[index];
+      appliedFlavor.current = index; motion.last = index;
+    };
+    if (motion.last < 0) applyFlavour(fi);
+    let targetX = tgt.x + Math.max(0, Math.abs(tz) - 0.3) * 0.25;
+    if (route === "/flavours") {
+      // TAG-style handoff: the current bottle accelerates off-screen, swaps flavour,
+      // then the new bottle spins back in from the edge instead of simply recolouring.
+      if (motion.mode === "idle" && fi !== motion.last) {
+        motion.mode = "out"; motion.pending = fi;
+        motion.outDir = G.position.x >= 0 ? 1 : -1;
+        motion.omega = 3.8;
+      }
+      if (motion.mode === "out") {
+        motion.pending = fi;
+        targetX = motion.outDir * (halfW + 2.1);
+        motion.omega = Math.min(12, motion.omega + 34 * dt);
+        motion.rotY += motion.outDir * motion.omega * dt;
+        if (Math.abs(G.position.x) > halfW + 1.25) {
+          applyFlavour(motion.pending);
+          // Desktop bottles enter from the side they will settle on; mobile alternates sides.
+          motion.inDir = Math.abs(tgt.x) > 0.15 ? Math.sign(tgt.x) : -motion.outDir;
+          G.position.x = motion.inDir * (halfW + 2.1);
+          targetX = G.position.x;
+          motion.rotTarget = motion.rotY + (motion.inDir > 0 ? -1 : 1) * Math.PI * 2;
+          motion.mode = "in";
+        }
+      } else if (motion.mode === "in") {
+        targetX = tgt.x;
+        motion.rotY = damp(motion.rotY, motion.rotTarget, 1 - Math.exp(-dt * 5.5));
+        if (Math.abs(G.position.x - tgt.x) < 0.12 && Math.abs(motion.rotTarget - motion.rotY) < 0.08) {
+          motion.mode = "idle"; motion.rotY = 0;
+        }
+      } else {
+        motion.rotY = damp(motion.rotY, 0, ease);
+      }
+    } else {
+      // The homepage's scroll-driven pour still switches flavours at its original cue.
+      if (appliedFlavor.current !== fi) applyFlavour(fi);
+      motion.mode = "idle"; motion.rotY = damp(motion.rotY, 0, ease);
+    }
+    G.rotation.y = damp(G.rotation.y, targetYaw + motion.rotY, ease);
     G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
-    G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, ease);
-    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.025, ease);
-    const fi = S.flavor, small = fi === 3 ? 0.88 : 1;
+    G.rotation.z = damp(G.rotation.z, tz + (route === "/flavours" && motion.mode !== "idle" ? -motion.outDir * 0.10 : 0), ease);
+    G.position.x = damp(G.position.x, targetX, 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
+    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.04, ease);
+    const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.9 : 1) * 3.65 * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 0.94 : 1) * 3.9 * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc)); G.visible = sc > 0.02;
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, visibilityEase);
-    const f = FL[fi];
-    // Keep the label, cap and liquid on the same flavour frame; no mixed-colour in-between state.
-    if (appliedFlavor.current !== fi) {
-      cols.liq.set(f.liq);
-      cols.cap.set(f.cap);
-      uni.uLab.value = labels[fi];
-      appliedFlavor.current = fi;
-    }
+    // The cap, liquid and label are updated together at the off-screen handoff.
     mouth.current.getWorldPosition(S.mouth); S.dir.set(0, 1, 0).applyQuaternion(G.quaternion);
     const on = Math.abs(G.rotation.z) > 75 * DEG && G.visible;
     if (on !== S.spillOn) { S.spillOn = on; emit(); }
