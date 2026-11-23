@@ -34,9 +34,9 @@ float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i=0;i<5;i++){ v += a*n(p); p 
 void main(){
   vec2 uv = vUv; vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
-  float f = fbm(p + 2.2*q + m*0.35);
-  vec3 col = mix(vec3(0.027,0.02,0.05), c2*0.58, smoothstep(0.25,0.9,f));
-  col = mix(col, c1, smoothstep(0.45,1.0, fbm(p*1.3 + q*2.0 + m*0.5)) * (1.0 - uv.y*0.5) * 0.58);
+  float f = fbm(p + 1.1*q + m*0.2);
+  vec3 base = vec3(0.025,0.02,0.04);
+  vec3 col = mix(base, c1*0.62, smoothstep(0.42,0.88,f) * (1.0 - uv.y*0.45) * 0.48);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -57,6 +57,7 @@ function Bottle() {
   const geo = useMemo(() => { let m: any; gl.scene.traverse((o: any) => { if (o.isMesh && !m) m = o; }); return m.geometry as THREE.BufferGeometry; }, []);
   const labels = useMemo(() => FL.map((f) => createCrispRazzlLabel(f.key)), []);
   const cols = useMemo(() => ({ liq: new THREE.Color(), cap: new THREE.Color() }), []);
+  const appliedFlavor = useRef(-1);
   const uni = useMemo(() => ({ uLab: { value: labels[0] }, uLiq: { value: cols.liq }, uCap: { value: cols.cap },
     uFill: { value: 0.33 }, uCapY: { value: 0.4 }, uLab0: { value: 0.0 }, uLab1: { value: 0.19 } }), []);
   const mat = useMemo(() => {
@@ -81,12 +82,12 @@ function Bottle() {
     };
     return m;
   }, []);
-  const tmp = useMemo(() => new THREE.Color(), []);
 
   useFrame((st, dt) => {
     const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
     // Frame-rate independent easing keeps the model's motion consistent across devices.
     const ease = 1 - Math.exp(-dt * 7.5);
+    const hideEase = 1 - Math.exp(-dt * 16);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.1, show: 1 };
     if (route === "/") {
       const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
@@ -98,15 +99,24 @@ function Bottle() {
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
-    G.rotation.y = damp(G.rotation.y, t * 0.62 + S.mx * 0.28 + S.drag, ease);
-    G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
+    const targetYaw = route === "/flavours" ? t * 0.22 + S.drag : t * 0.3 + S.mx * 0.12;
+    G.rotation.y = damp(G.rotation.y, targetYaw, ease);
+    G.rotation.x = damp(G.rotation.x, S.my * 5 * DEG, ease);
     G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, ease);
     G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.025, ease);
     const fi = S.flavor, small = fi === 3 ? 0.88 : 1;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, ease);
+    const visibilityEase = tgt.show === 0 ? hideEase : ease;
+    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc)); G.visible = sc > 0.02;
-    S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, 0.08);
-    const f = FL[fi]; cols.liq.lerp(tmp.set(f.liq), 0.12); cols.cap.lerp(tmp.set(f.cap), 0.12); uni.uLab.value = labels[fi];
+    S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, visibilityEase);
+    const f = FL[fi];
+    // Keep the label, cap and liquid on the same flavour frame; no mixed-colour in-between state.
+    if (appliedFlavor.current !== fi) {
+      cols.liq.set(f.liq);
+      cols.cap.set(f.cap);
+      uni.uLab.value = labels[fi];
+      appliedFlavor.current = fi;
+    }
     mouth.current.getWorldPosition(S.mouth); S.dir.set(0, 1, 0).applyQuaternion(G.quaternion);
     const on = Math.abs(G.rotation.z) > 75 * DEG && G.visible;
     if (on !== S.spillOn) { S.spillOn = on; emit(); }
@@ -138,7 +148,7 @@ function Glow() {
 
 // Large soft bokeh discs at different depths: ambient depth, not stars.
 function Bokeh() {
-  const N = 26, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
+  const N = 14, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 18, y: (Math.random() - 0.5) * 11, z: -4 + Math.random() * 6.5, s: 0.5 + Math.random() * 1.7, v: 0.0015 + Math.random() * 0.004, ph: Math.random() * 6.28 })), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, f = FL[S.flavor];
@@ -154,10 +164,10 @@ function Bokeh() {
 
 function Splash() {
   const ref = useRef<THREE.InstancedMesh>(null!), N = 180, d = useMemo(() => new THREE.Object3D(), []);
-  const p = useMemo(() => Array.from({ length: N }, () => ({ a: 0, l: 0, s: 0.1, pos: new THREE.Vector3(), v: new THREE.Vector3() })), []);
+  const p = useMemo(() => Array.from({ length: N }, () => ({ a: 0, l: 0, s: 0.06, pos: new THREE.Vector3(), v: new THREE.Vector3() })), []);
   const cur = useRef(0), col = useMemo(() => new THREE.Color(), []);
   const spawn = (pw: number) => {
-    const o = p[cur.current++ % N]; o.a = 1; o.l = 0; o.s = 0.05 + Math.random() * 0.11;
+    const o = p[cur.current++ % N]; o.a = 1; o.l = 0; o.s = 0.025 + Math.random() * 0.055;
     o.pos.copy(S.mouth); o.v.copy(S.dir).multiplyScalar((0.05 + Math.random() * 0.06) * pw);
     o.v.x += (Math.random() - 0.5) * 0.03; o.v.y += (Math.random() - 0.2) * 0.03; o.v.z += (Math.random() - 0.5) * 0.03;
   };
@@ -167,8 +177,18 @@ function Splash() {
     const m = ref.current;
     for (let i = 0; i < N; i++) {
       const o = p[i];
-      if (o.a) { o.l += dt; o.v.y -= 0.0032; o.pos.add(o.v); if (o.l > 1.4) o.a = 0; }
-      if (o.a) { d.position.copy(o.pos); d.scale.setScalar((1 - o.l / 1.4) * o.s * 3); } else { d.position.set(0, -60, 0); d.scale.setScalar(0.0001); }
+      if (o.a) {
+        o.l += dt;
+        const frameScale = Math.min(dt * 60, 2);
+        o.v.y -= 0.0055 * frameScale;
+        o.pos.addScaledVector(o.v, frameScale);
+        if (o.l > 0.85) o.a = 0;
+      }
+      if (o.a) {
+        d.position.copy(o.pos);
+        const particleScale = (1 - o.l / 0.85) * o.s * 3;
+        d.scale.set(particleScale, particleScale * 1.18, particleScale);
+      } else { d.position.set(0, -60, 0); d.scale.setScalar(0.0001); }
       d.updateMatrix(); m.setMatrixAt(i, d.matrix);
     }
     m.instanceMatrix.needsUpdate = true;
@@ -179,18 +199,21 @@ function Splash() {
 
 const vert = `varying vec3 N; varying vec3 V;
 void main(){ mat4 m = modelViewMatrix * instanceMatrix; vec4 mv = m * vec4(position,1.0); N = normalize(mat3(m) * normal); V = normalize(-mv.xyz); gl_Position = projectionMatrix * mv; }`;
-const frag = `uniform float t; varying vec3 N; varying vec3 V;
-void main(){ float f = pow(1.0 - abs(dot(N,V)), 2.2); vec3 c = 0.55 + 0.45*cos(6.2832*(f*1.3 + vec3(0.0,0.33,0.67) + t*0.05));
+const frag = `varying vec3 N; varying vec3 V;
+void main(){
+  float f = pow(1.0 - abs(dot(N,V)), 2.2);
+  vec3 c = mix(vec3(0.72,0.82,0.92), vec3(1.0), f * 0.5);
   float h = pow(max(dot(N, normalize(vec3(0.4,0.7,0.6))), 0.0), 40.0);
-  gl_FragColor = vec4(c*(f*1.1+0.06)+h, clamp((f*0.95+h+0.04), 0.0, 0.9)); }`;
+  gl_FragColor = vec4(c*(f*0.32+0.08)+h*0.35, clamp(f*0.42+h*0.25+0.025, 0.0, 0.42));
+}`;
 
 function Bubbles() {
-  const N = 40, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
+  const N = 22, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 11, z: -1 + Math.random() * 2.5, v: 0.006 + Math.random() * 0.014, s: 0.1 + Math.random() * 0.42, ph: Math.random() * 6.28, vx: 0, vy: 0 })), []);
-  const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false, uniforms: { t: { value: 0 } } }), []);
+  const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, hh = Math.tan(20 * DEG) * 8, hw = hh * (st.size.width / st.size.height), wx = st.pointer.x * hw, wy = st.pointer.y * hh;
-    mat.uniforms.t.value = t; const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
+    const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
     for (let i = 0; i < N; i++) {
       const b = data[i]; b.y += b.v * boost; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
       const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
@@ -212,12 +235,32 @@ function Lights() {
 export default function Stage() {
   useEffect(() => {
     const mm = (e: PointerEvent) => { S.mx = (e.clientX / innerWidth) * 2 - 1; S.my = -((e.clientY / innerHeight) * 2 - 1); };
-    let down = false, lx = 0;
-    const pd = (e: PointerEvent) => { if (S.route === "/flavours" && (e.target as HTMLElement).closest("[data-drag]")) { down = true; lx = e.clientX; } };
-    const pm = (e: PointerEvent) => { if (down) { S.drag += (e.clientX - lx) * 0.012; lx = e.clientX; } };
-    const pu = () => { down = false; };
-    addEventListener("pointermove", mm); addEventListener("pointerdown", pd); addEventListener("pointermove", pm); addEventListener("pointerup", pu);
-    return () => { removeEventListener("pointermove", mm); removeEventListener("pointerdown", pd); removeEventListener("pointermove", pm); removeEventListener("pointerup", pu); };
+    let down = false, dragging = false, lx = 0, ly = 0;
+    const pd = (e: PointerEvent) => {
+      if (S.route === "/flavours" && (e.target as HTMLElement).closest("[data-drag]")) {
+        down = true; dragging = false; lx = e.clientX; ly = e.clientY;
+      }
+    };
+    const pm = (e: PointerEvent) => {
+      if (!down) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      if (!dragging && Math.abs(dx) > 7 && Math.abs(dx) > Math.abs(dy) * 1.25) dragging = true;
+      if (dragging) S.drag += dx * 0.012;
+      lx = e.clientX; ly = e.clientY;
+    };
+    const pu = () => { down = false; dragging = false; };
+    addEventListener("pointermove", mm);
+    addEventListener("pointerdown", pd);
+    addEventListener("pointermove", pm);
+    addEventListener("pointerup", pu);
+    addEventListener("pointercancel", pu);
+    return () => {
+      removeEventListener("pointermove", mm);
+      removeEventListener("pointerdown", pd);
+      removeEventListener("pointermove", pm);
+      removeEventListener("pointerup", pu);
+      removeEventListener("pointercancel", pu);
+    };
   }, []);
   return (
     <Canvas flat dpr={[1, 1.75]} camera={{ fov: 40, position: [0, 0, 8] }} gl={{ alpha: true, antialias: true }}

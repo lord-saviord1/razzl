@@ -6,11 +6,17 @@ import { CHARACTERS } from "@/lib/characters";
 export default function Lineup() {
   const { f, i } = useFlavor();
   const c = CHARACTERS[f.key];
+  const isLongName = f.name.length >= 10;
   return (
     <main className="page" data-drag style={{ touchAction: "pan-y" }}>
       <div style={{ maxWidth: 520 }}>
         <span className="eyebrow">Flavours</span>
-        <h1 className="display o-l">{f.name}</h1>
+        <h1
+          className="display o-l"
+          style={isLongName ? { fontSize: "clamp(34px, 5.2vw, 76px)", letterSpacing: "-0.03em" } : undefined}
+        >
+          {f.name}
+        </h1>
         <p className="lead serif o-l">{f.line}</p>
         <p>{f.desc}</p>
         <div className="chips" style={{ margin: "18px 0" }}><span className="chip">{f.size}</span><span className="chip">{f.kcal}</span><span className="chip">{f.sugar}</span>{i === 3 && <span className="chip">8% grapefruit juice</span>}</div>
