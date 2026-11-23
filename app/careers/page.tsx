@@ -1,0 +1,13 @@
+"use client";
+import { RLink } from "@/components/Shell";
+export default function Careers() {
+  return (
+    <main className="page">
+      <span className="eyebrow">Careers</span>
+      <h1 className="display o-l">Join the Razzl world</h1>
+      <p className="lead serif o-l">Energetic, dynamic people full of joy.</p>
+      <p>Razzl is made by Ultimum Limited, a fast-growing food and beverage company. Current openings are listed on the official careers page.</p>
+      <div className="links"><a href="https://www.drinkrazzl.com/careers/" target="_blank" rel="noopener noreferrer">See open roles</a><RLink href="/contact">Introduce yourself</RLink></div>
+    </main>
+  );
+}
