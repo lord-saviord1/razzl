@@ -36,7 +36,8 @@ void main(){
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 1.1*q + m*0.2);
   vec3 base = vec3(0.025,0.02,0.04);
-  vec3 col = mix(base, c1*0.62, smoothstep(0.42,0.88,f) * (1.0 - uv.y*0.45) * 0.48);
+  vec3 tint = mix(c1, c2, smoothstep(0.18,0.9,uv.x));
+  vec3 col = mix(base, tint*0.78, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.66);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -93,20 +94,20 @@ function Bottle() {
       const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
       tz = -ang * DEG; setFlavor(flavor);
       tgt = { x: mob ? 0 : Math.min(2.35, halfW * 0.55), y: mob ? 0.9 : 0, s: 1.1, show: S.show };
-    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.8 : 0.1, s: 1.25, show: 1 };
+    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.8 : 0.1, s: 1.32, show: 1 };
     else tgt.show = 0;
     S.pop = Math.max(0, S.pop - dt * 0.9); tz -= Math.sin(S.pop * Math.PI) * 1.9;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
-    const targetYaw = route === "/flavours" ? t * 0.22 + S.drag : t * 0.3 + S.mx * 0.12;
+    const targetYaw = route === "/flavours" ? t * 0.28 + S.drag : t * 0.38 + Math.sin(t * 0.7) * 0.16 + S.mx * 0.28;
     G.rotation.y = damp(G.rotation.y, targetYaw, ease);
-    G.rotation.x = damp(G.rotation.x, S.my * 5 * DEG, ease);
+    G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
     G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, ease);
     G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.025, ease);
     const fi = S.flavor, small = fi === 3 ? 0.88 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 0.9 : 1) * 3.65 * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc)); G.visible = sc > 0.02;
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, visibilityEase);
     const f = FL[fi];
@@ -134,7 +135,7 @@ function Glow() {
   const a = useRef<THREE.Mesh>(null!), b = useRef<THREE.Mesh>(null!), tex = useMemo(softTex, []), col = useMemo(() => new THREE.Color(), []);
   useFrame((st) => {
     const f = FL[S.flavor], t = st.clock.elapsedTime, p = S.bottlePos;
-    for (const [m, sc, op, z, dy] of [[a.current, 9, 0.28, -1.5, -0.2], [b.current, 3.8, 0.22, -0.6, 0]] as any) {
+    for (const [m, sc, op, z, dy] of [[a.current, 10.5, 0.38, -1.5, -0.2], [b.current, 4.4, 0.3, -0.6, 0]] as any) {
       const mat = m.material as THREE.MeshBasicMaterial;
       m.position.set(p.x, p.y + dy, z); m.scale.setScalar(sc + Math.sin(t * 0.8) * 0.3);
       mat.color.lerp(col.set(f.hex), 0.08); mat.opacity = op * S.glow;
@@ -148,14 +149,14 @@ function Glow() {
 
 // Large soft bokeh discs at different depths: ambient depth, not stars.
 function Bokeh() {
-  const N = 14, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
+  const N = 22, ref = useRef<THREE.InstancedMesh>(null!), tex = useMemo(softTex, []), d = useMemo(() => new THREE.Object3D(), []), c = useMemo(() => new THREE.Color(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 18, y: (Math.random() - 0.5) * 11, z: -4 + Math.random() * 6.5, s: 0.5 + Math.random() * 1.7, v: 0.0015 + Math.random() * 0.004, ph: Math.random() * 6.28 })), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, f = FL[S.flavor];
     data.forEach((o, i) => {
       o.y += o.v; if (o.y > 6.5) o.y = -6.5;
       d.position.set(o.x + Math.sin(t * 0.3 + o.ph) * 0.4, o.y, o.z); d.scale.setScalar(o.s * (1 + o.z * 0.05)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
-      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.10 + (o.z + 4) * 0.018); ref.current.setColorAt(i, c);
+      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.15 + (o.z + 4) * 0.025); ref.current.setColorAt(i, c);
     });
     ref.current.instanceMatrix.needsUpdate = true; if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
   });
@@ -208,7 +209,7 @@ void main(){
 }`;
 
 function Bubbles() {
-  const N = 22, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
+  const N = 30, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 11, z: -1 + Math.random() * 2.5, v: 0.006 + Math.random() * 0.014, s: 0.1 + Math.random() * 0.42, ph: Math.random() * 6.28, vx: 0, vy: 0 })), []);
   const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
