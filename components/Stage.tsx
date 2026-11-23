@@ -35,8 +35,8 @@ void main(){
   vec2 uv = vUv; vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 2.2*q + m*0.35);
-  vec3 col = mix(vec3(0.027,0.02,0.05), c2*0.8, smoothstep(0.25,0.9,f));
-  col = mix(col, c1, smoothstep(0.45,1.0, fbm(p*1.3 + q*2.0 + m*0.5)) * (1.0 - uv.y*0.5) * 0.85);
+  vec3 col = mix(vec3(0.027,0.02,0.05), c2*0.58, smoothstep(0.25,0.9,f));
+  col = mix(col, c1, smoothstep(0.45,1.0, fbm(p*1.3 + q*2.0 + m*0.5)) * (1.0 - uv.y*0.5) * 0.58);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -85,6 +85,8 @@ function Bottle() {
 
   useFrame((st, dt) => {
     const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
+    // Frame-rate independent easing keeps the model's motion consistent across devices.
+    const ease = 1 - Math.exp(-dt * 7.5);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.1, show: 1 };
     if (route === "/") {
       const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
@@ -94,13 +96,14 @@ function Bottle() {
     else tgt.show = 0;
     S.pop = Math.max(0, S.pop - dt * 0.9); tz -= Math.sin(S.pop * Math.PI) * 1.9;
     const G = g.current;
-    G.rotation.z = damp(G.rotation.z, tz, 0.12);
-    G.rotation.y = damp(G.rotation.y, t * 0.35 + S.mx * 0.4 + S.drag, 0.06);
-    G.rotation.x = damp(G.rotation.x, S.my * 12 * DEG, 0.06);
-    G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, 0.1);
-    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.6) * 0.08, 0.1);
+    G.rotation.z = damp(G.rotation.z, tz, ease);
+    // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
+    G.rotation.y = damp(G.rotation.y, t * 0.62 + S.mx * 0.28 + S.drag, ease);
+    G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
+    G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, ease);
+    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.025, ease);
     const fi = S.flavor, small = fi === 3 ? 0.88 : 1;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, 0.1);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, ease);
     G.scale.setScalar(Math.max(0.0001, sc)); G.visible = sc > 0.02;
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, 0.08);
     const f = FL[fi]; cols.liq.lerp(tmp.set(f.liq), 0.12); cols.cap.lerp(tmp.set(f.cap), 0.12); uni.uLab.value = labels[fi];
@@ -121,7 +124,7 @@ function Glow() {
   const a = useRef<THREE.Mesh>(null!), b = useRef<THREE.Mesh>(null!), tex = useMemo(softTex, []), col = useMemo(() => new THREE.Color(), []);
   useFrame((st) => {
     const f = FL[S.flavor], t = st.clock.elapsedTime, p = S.bottlePos;
-    for (const [m, sc, op, z, dy] of [[a.current, 10, 0.5, -1.5, -0.2], [b.current, 4.2, 0.4, -0.6, 0]] as any) {
+    for (const [m, sc, op, z, dy] of [[a.current, 9, 0.28, -1.5, -0.2], [b.current, 3.8, 0.22, -0.6, 0]] as any) {
       const mat = m.material as THREE.MeshBasicMaterial;
       m.position.set(p.x, p.y + dy, z); m.scale.setScalar(sc + Math.sin(t * 0.8) * 0.3);
       mat.color.lerp(col.set(f.hex), 0.08); mat.opacity = op * S.glow;
@@ -142,7 +145,7 @@ function Bokeh() {
     data.forEach((o, i) => {
       o.y += o.v; if (o.y > 6.5) o.y = -6.5;
       d.position.set(o.x + Math.sin(t * 0.3 + o.ph) * 0.4, o.y, o.z); d.scale.setScalar(o.s * (1 + o.z * 0.05)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
-      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.16 + (o.z + 4) * 0.025); ref.current.setColorAt(i, c);
+      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.10 + (o.z + 4) * 0.018); ref.current.setColorAt(i, c);
     });
     ref.current.instanceMatrix.needsUpdate = true; if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
   });
