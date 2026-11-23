@@ -63,7 +63,7 @@ h2.display{font-size:clamp(32px,5.4vw,76px);line-height:1;margin:64px 0 14px;tex
 /* culture */
 .wall{columns:3 250px;column-gap:18px;margin-top:24px}
 .post{display:block;break-inside:avoid;margin-bottom:18px;color:#fff;text-decoration:none;border-radius:20px;overflow:hidden;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
-.post:hover{transform:scale(1.03)!important}.post img{display:block;width:100%}.post .cap{padding:14px 16px 18px}.post .cap p{font-size:14px;margin:8px 0 0}
+.tag{display:inline-block;color:var(--brand-yellow);font:800 11px var(--f-body);letter-spacing:.12em;text-transform:uppercase}.post:hover{transform:scale(1.03)!important}.post img{display:block;width:100%}.post .cap{padding:14px 16px 18px}.post .cap p{font-size:14px;margin:8px 0 0}
 .embeds{display:flex;flex-wrap:wrap;gap:18px;margin-top:28px}
 .promo{display:grid;grid-template-columns:1.3fr 1fr;gap:34px;align-items:center;margin-top:40px;padding:34px}
 .promo-img{width:100%;border-radius:22px;transform:rotate(2deg);box-shadow:0 24px 50px rgba(0,0,0,.5)}
