@@ -85,6 +85,8 @@ function Bottle() {
 
   useFrame((st, dt) => {
     const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
+    // Frame-rate independent easing keeps the model's motion consistent across devices.
+    const ease = 1 - Math.exp(-dt * 7.5);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.1, show: 1 };
     if (route === "/") {
       const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
@@ -94,13 +96,14 @@ function Bottle() {
     else tgt.show = 0;
     S.pop = Math.max(0, S.pop - dt * 0.9); tz -= Math.sin(S.pop * Math.PI) * 1.9;
     const G = g.current;
-    G.rotation.z = damp(G.rotation.z, tz, 0.12);
-    G.rotation.y = damp(G.rotation.y, t * 0.35 + S.mx * 0.4 + S.drag, 0.06);
-    G.rotation.x = damp(G.rotation.x, S.my * 12 * DEG, 0.06);
-    G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, 0.1);
-    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.6) * 0.08, 0.1);
+    G.rotation.z = damp(G.rotation.z, tz, ease);
+    // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
+    G.rotation.y = damp(G.rotation.y, t * 0.62 + S.mx * 0.28 + S.drag, ease);
+    G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
+    G.position.x = damp(G.position.x, tgt.x + Math.max(0, Math.abs(G.rotation.z) - 0.3) * 0.25, ease);
+    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.025, ease);
     const fi = S.flavor, small = fi === 3 ? 0.88 : 1;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, 0.1);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 0.8 : 1) * 3 * tgt.show * small, ease);
     G.scale.setScalar(Math.max(0.0001, sc)); G.visible = sc > 0.02;
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, 0.08);
     const f = FL[fi]; cols.liq.lerp(tmp.set(f.liq), 0.12); cols.cap.lerp(tmp.set(f.cap), 0.12); uni.uLab.value = labels[fi];
