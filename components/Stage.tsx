@@ -63,16 +63,16 @@ function Atmosphere() {
 
 function Bottle() {
   const g = useRef<THREE.Group>(null!), mesh = useRef<THREE.Mesh>(null!), mouth = useRef<THREE.Object3D>(null!);
-  const { gl, scene } = useThree();
+  const { gl: renderer, scene } = useThree();
   const flavorMotion = useRef({ last: -1, mode: "idle" as "idle" | "out" | "in", pending: 0, outDir: 1, inDir: 1, omega: 0, rotY: 0, rotTarget: 0 });
   useEffect(() => {
-    const pmrem = new THREE.PMREMGenerator(gl);
+    const pmrem = new THREE.PMREMGenerator(renderer);
     const environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
     scene.environment = environment;
     return () => { scene.environment = null; environment.dispose(); pmrem.dispose(); };
-  }, [gl, scene]);
-  const gl: any = useGLTF("/models/bottle.glb");
-  const geo = useMemo(() => { let m: any; gl.scene.traverse((o: any) => { if (o.isMesh && !m) m = o; }); return m.geometry as THREE.BufferGeometry; }, []);
+  }, [renderer, scene]);
+  const bottleGltf: any = useGLTF("/models/bottle.glb");
+  const geo = useMemo(() => { let m: any; bottleGltf.scene.traverse((o: any) => { if (o.isMesh && !m) m = o; }); return m.geometry as THREE.BufferGeometry; }, []);
   const labels = useMemo(() => FL.map((f) => createCrispRazzlLabel(f.key)), []);
   const cols = useMemo(() => ({ liq: new THREE.Color(), cap: new THREE.Color() }), []);
   const appliedFlavor = useRef(-1);
@@ -319,7 +319,7 @@ export default function Stage() {
     };
   }, []);
   return (
-    <Canvas flat dpr={[1, 1.75]} camera={{ fov: 40, position: [0, 0, 8] }} gl={{ alpha: true, antialias: true }}
+    <Canvas flat dpr={[1, 1.5]} camera={{ fov: 40, position: [0, 0, 8] }} gl={{ alpha: true, antialias: true }}
       style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none" }} eventSource={typeof document !== "undefined" ? document.body : undefined}>
       <Atmosphere /><Lights /><Glow /><Bokeh /><Bubbles /><Bottle /><Splash />
     </Canvas>
