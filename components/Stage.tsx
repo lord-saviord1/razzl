@@ -115,24 +115,32 @@ function Atmosphere() {
   const bgQuad = useMemo(() => new THREE.Mesh(new THREE.PlaneGeometry(2, 2), renderMaterial), [renderMaterial]);
   const background = useMemo(() => {
     const canvas = document.createElement("canvas");
-    canvas.width = 1024; canvas.height = 1024;
+    canvas.width = 512; canvas.height = 512;
     const ctx = canvas.getContext("2d")!;
-    ctx.fillStyle = "#E3182B"; ctx.fillRect(0, 0, 1024, 1024);
-    const blobs = [
-      ["#FF7100", 180, 190, 680], ["#FFE500", 850, 250, 570],
-      ["#00A64F", 730, 890, 700], ["#FFF2D7", 240, 850, 520],
-      ["#E3182B", 520, 480, 620],
-    ] as const;
-    for (const [color, x, y, radius] of blobs) {
-      const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, color); gradient.addColorStop(1, "rgba(255,255,255,0)");
-      ctx.globalAlpha = 0.9; ctx.fillStyle = gradient; ctx.fillRect(0, 0, 1024, 1024);
-    }
-    ctx.globalAlpha = 1;
     const tex = new THREE.CanvasTexture(canvas);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.minFilter = THREE.LinearFilter; tex.magFilter = THREE.LinearFilter;
-    return tex;
+    const paint = (time: number) => {
+      ctx.fillStyle = "#FBF7EF"; ctx.fillRect(0, 0, 512, 512);
+      const blobs = [
+        ["#DDE5B0", 105 + Math.sin(time * .12) * 55, 110 + Math.cos(time * .10) * 38, 330],
+        ["#E4D8EA", 390 + Math.cos(time * .09) * 48, 115 + Math.sin(time * .13) * 42, 310],
+        ["#FBE3D9", 360 + Math.sin(time * .08) * 42, 390 + Math.cos(time * .11) * 35, 320],
+        ["#D5EDF9", 100 + Math.cos(time * .10) * 38, 390 + Math.sin(time * .09) * 40, 300],
+        ["#FDD835", 255 + Math.sin(time * .07) * 70, 245 + Math.cos(time * .08) * 50, 185],
+        ["#E2552B", 440 + Math.sin(time * .06) * 20, 300 + Math.cos(time * .07) * 35, 125],
+        ["#A0B043", 65 + Math.cos(time * .06) * 24, 235 + Math.sin(time * .08) * 35, 145],
+      ] as const;
+      for (const [color, x, y, radius] of blobs) {
+        const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+        gradient.addColorStop(0, color); gradient.addColorStop(.58, color + "B8");
+        gradient.addColorStop(1, "rgba(251,247,239,0)");
+        ctx.fillStyle = gradient; ctx.fillRect(0, 0, 512, 512);
+      }
+      tex.needsUpdate = true;
+    };
+    paint(0);
+    return { tex, paint };
   }, []);
   const targets = useRef<{ a: THREE.WebGLRenderTarget; b: THREE.WebGLRenderTarget } | null>(null);
   const frame = useRef(0);
@@ -158,7 +166,7 @@ function Atmosphere() {
   }, [simScene, bgScene, simQuad, bgQuad]);
   useEffect(() => () => {
     simMaterial.dispose(); renderMaterial.dispose();
-    simQuad.geometry.dispose(); bgQuad.geometry.dispose(); background.dispose();
+    simQuad.geometry.dispose(); bgQuad.geometry.dispose(); background.tex.dispose();
   }, [simMaterial, renderMaterial, simQuad, bgQuad, background]);
   useFrame((state) => {
     const pair = targets.current;
@@ -174,7 +182,7 @@ function Atmosphere() {
     gl.setRenderTarget(pair.b);
     gl.render(simScene, simCamera);
     renderMaterial.uniforms.textureA.value = pair.b.texture;
-    renderMaterial.uniforms.textureB.value = background;
+    renderMaterial.uniforms.textureB.value = background.tex;
     gl.setRenderTarget(null);
     gl.autoClear = true;
     gl.clear();
