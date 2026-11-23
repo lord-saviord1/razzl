@@ -210,10 +210,10 @@ void main(){
 function Bubbles() {
   const N = 22, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
   const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 11, z: -1 + Math.random() * 2.5, v: 0.006 + Math.random() * 0.014, s: 0.1 + Math.random() * 0.42, ph: Math.random() * 6.28, vx: 0, vy: 0 })), []);
-  const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false, uniforms: { t: { value: 0 } } }), []);
+  const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, hh = Math.tan(20 * DEG) * 8, hw = hh * (st.size.width / st.size.height), wx = st.pointer.x * hw, wy = st.pointer.y * hh;
-    mat.uniforms.t.value = t; const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
+    const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
     for (let i = 0; i < N; i++) {
       const b = data[i]; b.y += b.v * boost; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
       const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
