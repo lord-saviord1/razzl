@@ -35,8 +35,8 @@ void main(){
   vec2 uv = vUv; vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 2.2*q + m*0.35);
-  vec3 col = mix(vec3(0.027,0.02,0.05), c2*0.8, smoothstep(0.25,0.9,f));
-  col = mix(col, c1, smoothstep(0.45,1.0, fbm(p*1.3 + q*2.0 + m*0.5)) * (1.0 - uv.y*0.5) * 0.85);
+  vec3 col = mix(vec3(0.027,0.02,0.05), c2*0.58, smoothstep(0.25,0.9,f));
+  col = mix(col, c1, smoothstep(0.45,1.0, fbm(p*1.3 + q*2.0 + m*0.5)) * (1.0 - uv.y*0.5) * 0.58);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
@@ -124,7 +124,7 @@ function Glow() {
   const a = useRef<THREE.Mesh>(null!), b = useRef<THREE.Mesh>(null!), tex = useMemo(softTex, []), col = useMemo(() => new THREE.Color(), []);
   useFrame((st) => {
     const f = FL[S.flavor], t = st.clock.elapsedTime, p = S.bottlePos;
-    for (const [m, sc, op, z, dy] of [[a.current, 10, 0.5, -1.5, -0.2], [b.current, 4.2, 0.4, -0.6, 0]] as any) {
+    for (const [m, sc, op, z, dy] of [[a.current, 9, 0.28, -1.5, -0.2], [b.current, 3.8, 0.22, -0.6, 0]] as any) {
       const mat = m.material as THREE.MeshBasicMaterial;
       m.position.set(p.x, p.y + dy, z); m.scale.setScalar(sc + Math.sin(t * 0.8) * 0.3);
       mat.color.lerp(col.set(f.hex), 0.08); mat.opacity = op * S.glow;
@@ -145,7 +145,7 @@ function Bokeh() {
     data.forEach((o, i) => {
       o.y += o.v; if (o.y > 6.5) o.y = -6.5;
       d.position.set(o.x + Math.sin(t * 0.3 + o.ph) * 0.4, o.y, o.z); d.scale.setScalar(o.s * (1 + o.z * 0.05)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
-      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.16 + (o.z + 4) * 0.025); ref.current.setColorAt(i, c);
+      c.set(i % 3 === 0 ? f.hex2 : f.hex).multiplyScalar(0.10 + (o.z + 4) * 0.018); ref.current.setColorAt(i, c);
     });
     ref.current.instanceMatrix.needsUpdate = true; if (ref.current.instanceColor) ref.current.instanceColor.needsUpdate = true;
   });
