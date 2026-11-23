@@ -33,7 +33,16 @@ float h(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
 float n(vec2 p){ vec2 i = floor(p), f = fract(p); f = f*f*(3.0-2.0*f); return mix(mix(h(i), h(i+vec2(1.0,0.0)), f.x), mix(h(i+vec2(0.0,1.0)), h(i+vec2(1.0,1.0)), f.x), f.y); }
 float fbm(vec2 p){ float v = 0.0, a = 0.5; for(int i=0;i<5;i++){ v += a*n(p); p *= 2.02; a *= 0.5; } return v; }
 void main(){
-  vec2 uv = vUv; vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
+  // Pointer-centred surface waves distort the same organic colour field.
+  vec2 uv = vUv;
+  vec2 pointerUV = (m + 1.0) * 0.5;
+  vec2 delta = (uv - pointerUV) * vec2(1.7, 1.0);
+  float radius = length(delta);
+  float phase = radius * 34.0 - t * 5.2;
+  float wave = sin(phase) * exp(-radius * 2.7);
+  vec2 direction = delta / max(radius, 0.001);
+  uv += direction * wave * 0.012;
+  vec2 p = uv*vec2(1.7,1.0) + vec2(0.0, t*0.02);
   vec2 q = vec2(fbm(p + vec2(0.0, t*0.05)), fbm(p + vec2(5.2,1.3) - t*0.04));
   float f = fbm(p + 1.1*q + m*0.2);
   vec3 base = vec3(0.025,0.02,0.04);
@@ -48,6 +57,9 @@ void main(){
   vec3 tint = mix(campaign, flavourTint, 0.68);
   vec3 col = mix(base, tint*0.82, smoothstep(0.34,0.86,f) * (1.0 - uv.y*0.38) * 0.72);
   col *= mix(0.45, 1.0, smoothstep(1.15, 0.25, length(uv-0.5)));
+  float ring = exp(-abs(sin(phase * 0.72)) * 18.0) * exp(-radius * 2.15);
+  col += vec3(0.18, 0.2, 0.23) * ring * 0.42;
+  col += tint * (abs(wave) * 0.045);
   gl_FragColor = vec4(col, 1.0);
   #include <colorspace_fragment>
 }`;
@@ -274,6 +286,11 @@ function Bubbles() {
       const b = data[i]; b.y += b.v * boost; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
       const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
       if (di < 2) { const fo = (2 - di) * 0.03; b.vx += (dx / (di || 1)) * fo; b.vy += (dy / (di || 1)) * fo; }
+      // The same radial wave that distorts the background gently carries nearby bubbles.
+      const waveReach = Math.exp(-di * 1.55);
+      const wavePush = Math.sin(di * 5.2 - t * 5.2) * waveReach * 0.0045;
+      b.vx += (dx / (di || 1)) * wavePush;
+      b.vy += (dy / (di || 1)) * wavePush;
       b.vx *= 0.94; b.vy *= 0.94;
       d.position.set(sx + b.vx, b.y + b.vy, b.z); d.scale.setScalar(b.s * (1 + Math.sin(t * 3 + b.ph) * 0.05)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
     }
