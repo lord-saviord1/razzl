@@ -40,17 +40,17 @@ export default function Home() {
           <RLink href="/flavours" className="btn mag">Explore flavours</RLink>
           <RLink href="/culture" className="btn ghost mag">See the culture</RLink>
         </div>
+        <a className="scroll-cue" href="#act2" aria-label="Scroll to explore the four flavours"><span>Scroll to explore</span><i aria-hidden="true">v</i></a>
       </section>
 
       <section id="act2" className="act">
-        <div className={"story" + (spill ? " on" : "")}><span className="o-l">Crisp. Tart. Unapologetic.</span></div>
+        <div className={"story" + (spill ? " on" : "")}><span className="o-l">One bottle. Four ways to Razzl.</span></div>
         <div className="panel glass">
-          <span className="eyebrow">Tilt &amp; spill · {i + 1}/4</span>
+          <span className="eyebrow">The flavour roll · {i + 1}/4</span>
           <h2 className="o-l">{f.name}</h2>
           <div className="tl serif o-l">{f.line}</div>
           <p>{f.desc}</p>
           <div className="chips"><span className="chip">{f.size}</span><span className="chip">{f.kcal}</span><span className="chip">{f.sugar}</span></div>
-          <button className="btn mag" style={{ marginTop: 16 }} onClick={() => { S.pop = 1; S.burst = 30; }}>Shake it</button>
         </div>
       </section>
 
