@@ -575,3 +575,10 @@ select option{color:#30263A;background:#FFF8EC}
 .btn,.btn:hover,.btn:focus-visible{translate:0 0}
 @media(max-width:800px){#hero .scroll-cue{margin-top:14px;font-size:10px}.panel{left:5vw;right:5vw;bottom:calc(12px + env(safe-area-inset-bottom,0px))}#intro .intro-mark{width:66px;height:104px}}
 @media(prefers-reduced-motion:reduce){#hero .scroll-cue i,#intro .intro-mark{animation:none}}
+
+/* Remove decorative underline rules; links remain clear through colour and hover feedback. */
+.links a,.ft-cols a{text-decoration:none!important;border-bottom:0!important}
+.links a:hover,.ft-cols a:hover{text-decoration:none!important}
+.panel{bottom:5vh}
+@media(max-width:800px){.panel{bottom:calc(12px + env(safe-area-inset-bottom,0px));max-height:40svh}.panel.glass p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}}
+@media(max-width:420px){.panel{max-height:38svh;padding:15px 16px}}
