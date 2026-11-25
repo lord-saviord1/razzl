@@ -65,15 +65,6 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     const tick = (t: number) => lenis.raf(t * 1000); gsap.ticker.add(tick); gsap.ticker.lagSmoothing(0);
     return () => { gsap.ticker.remove(tick); lenis.destroy(); S.lenis = null; };
   }, []);
-  useEffect(() => { // magnetic buttons
-    const els = Array.from(document.querySelectorAll<HTMLElement>(".mag"));
-    const q = els.map((el) => ({ el, x: gsap.quickTo(el, "x", { duration: 0.4, ease: "power3" }), y: gsap.quickTo(el, "y", { duration: 0.4, ease: "power3" }) }));
-    const mv = (e: MouseEvent) => q.forEach(({ el, x, y }) => {
-      const r = el.getBoundingClientRect(), dx = e.clientX - (r.left + r.width / 2), dy = e.clientY - (r.top + r.height / 2);
-      const near = Math.hypot(dx, dy) < Math.max(r.width, r.height) / 2 + 60; x(near ? dx * 0.3 : 0); y(near ? dy * 0.3 : 0);
-    });
-    addEventListener("mousemove", mv); return () => removeEventListener("mousemove", mv);
-  }, [path]);
   return (
     <>
       <div id="amb" aria-hidden="true" /><div id="vig" aria-hidden="true" /><Stage /><div id="grain" aria-hidden="true" />
