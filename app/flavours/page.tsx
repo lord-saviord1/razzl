@@ -9,11 +9,11 @@ export default function Lineup() {
   const isLongName = f.name.length >= 10;
   return (
     <main className="page" data-drag style={{ touchAction: "pan-y" }}>
-      <div style={{ maxWidth: 520 }}>
+      <div className="flavour-copy" style={{ width: "100%", maxWidth: 680, minWidth: 0 }}>
         <span className="eyebrow">Flavours</span>
         <h1
           className="display o-l"
-          style={isLongName ? { fontSize: "clamp(32px, 5.2vw, 76px)", letterSpacing: "-0.03em", maxWidth: "100%", whiteSpace: "nowrap" } : undefined}
+          style={isLongName ? { fontSize: "clamp(30px, 5vw, 64px)", letterSpacing: "-0.035em", width: "100%", maxWidth: "100%", whiteSpace: "normal", overflowWrap: "anywhere", lineHeight: 1.02 } : { maxWidth: "100%", lineHeight: 1.02 }}
         >
           {f.name}
         </h1>
