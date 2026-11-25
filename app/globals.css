@@ -462,52 +462,90 @@ select option{color:#30263A;background:#FFF8EC}
 }
 
 
-/* Real Razzl product photograph leads the homepage hero. */
+/* Full-bleed Razzl product photograph: the image is the hero backdrop, not a card. */
 #hero.hero{
   position:relative;
+  min-height:100svh;
+  min-height:100dvh;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
   align-items:flex-start;
+  padding:clamp(110px,17vh,170px) 6vw clamp(42px,8vh,88px);
   overflow:hidden;
   isolation:isolate;
+  background:#30263A;
 }
 #hero .hero-photo{
-  position:relative;
-  width:min(66vw,920px);
-  height:clamp(220px,39vh,440px);
-  margin:clamp(12px,2vh,24px) 0 12px;
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  width:100%;
+  height:100%;
+  margin:0;
   overflow:hidden;
-  border-radius:28px 28px 28px 6px;
-  background:var(--j-pear);
-  box-shadow:0 24px 64px rgba(59,25,80,.18);
+  border-radius:0;
+  background:#30263A;
+  box-shadow:none;
 }
 #hero .hero-photo img{
   display:block;
   width:100%;
   height:100%;
   object-fit:cover;
-  object-position:center 54%;
+  object-position:center center;
+}
+#hero.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(24,12,25,.08) 8%,rgba(24,12,25,.04) 38%,rgba(24,12,25,.72) 100%);
 }
 #hero .wm{
   position:relative;
   z-index:1;
-  color:var(--j-amethyst);
-  text-shadow:none;
-  margin:2px 0 8px;
+  color:#FFF2D7;
+  text-shadow:0 4px 22px rgba(20,8,18,.34);
+  margin:0 0 8px;
 }
-#hero .sub{color:var(--j-deep);text-shadow:none}
-#hero .eyebrow{color:var(--j-amethyst)}
+#hero .sub{
+  color:#FFF2D7!important;
+  background:rgba(59,25,80,.88)!important;
+  border-left:3px solid #FFE500!important;
+  box-shadow:0 8px 26px rgba(20,8,18,.18);
+  max-width:30ch;
+}
+#hero .eyebrow{
+  color:#FFF2D7;
+  background:rgba(59,25,80,.84);
+  padding:9px 13px;
+  border-left:3px solid #A0B043;
+}
+#hero .chips{position:relative;z-index:2}
 @media(max-width:800px){
-  #hero.hero{align-items:flex-start}
-  #hero .hero-photo{
-    width:100%;
-    height:clamp(190px,34svh,310px);
-    margin:14px 0 10px;
-    border-radius:20px 20px 20px 5px;
+  #hero.hero{
+    min-height:100svh;
+    min-height:100dvh;
+    justify-content:flex-end;
+    padding:calc(100px + env(safe-area-inset-top,0px)) 20px calc(38px + env(safe-area-inset-bottom,0px));
   }
-  #hero .hero-photo img{object-position:center 52%}
+  #hero .hero-photo{
+    inset:0;
+    width:100%;
+    height:100%;
+  }
+  #hero .hero-photo img{
+    object-fit:contain;
+    object-position:center center;
+  }
+  #hero.hero::after{
+    background:linear-gradient(180deg,rgba(24,12,25,.08) 0%,rgba(24,12,25,0) 34%,rgba(24,12,25,.78) 100%);
+  }
   #hero .wm{font-size:clamp(76px,18vw,126px);line-height:.88}
   #hero .sub{max-width:25ch}
 }
 @media(max-width:380px){
-  #hero .hero-photo{height:190px}
   #hero .wm{font-size:clamp(68px,17vw,82px)}
 }
