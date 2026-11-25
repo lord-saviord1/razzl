@@ -240,7 +240,7 @@ function Bottle() {
       // Scroll advances the flavour; the bottle stays upright and keeps turning.
       tz = 0; setFlavor(flavor, false);
       tgt = { x: mob ? 0 : Math.min(1.55, halfW * 0.36), y: mob ? 0.12 : -0.08, s: 1.12, show: S.show };
-    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 1.35 : 0.1, s: 1.18, show: 1 }; }
+    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 1.6 : 0.1, s: 1.18, show: 1 }; }
     else tgt.show = 0;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
@@ -298,7 +298,7 @@ function Bottle() {
     G.position.y = damp(G.position.y, tgt.y + (route === "/" ? Math.sin(t * 0.9) * (mob ? 0.055 : 0.13) : 0), ease);
     const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? (route === "/flavours" ? 2.35 : 3.02) : 3.72) * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? (route === "/flavours" ? 1.9 : 3.02) : 3.72) * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc));
     // Visibility is route-gated as well as scale-gated: the persistent WebGL
     // stage must never leak the bottle into the homepage hero before ScrollTrigger reveals it.
