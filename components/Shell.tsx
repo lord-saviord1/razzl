@@ -6,6 +6,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Lenis from "lenis";
 import Intro from "./Intro";
+import BrandRain from "./BrandRain";
 import { S } from "@/lib/store";
 import { FL } from "@/lib/store";
 
@@ -67,7 +68,7 @@ export default function Shell({ children }: { children: React.ReactNode }) {
   }, []);
   return (
     <>
-      <div id="amb" aria-hidden="true" /><div id="vig" aria-hidden="true" /><Stage /><div id="grain" aria-hidden="true" />
+      <div id="amb" aria-hidden="true" /><div id="vig" aria-hidden="true" /><Stage /><BrandRain /><div id="grain" aria-hidden="true" />
       <header id="hd">
         <RLink href="/" className="logo" onClick={() => setOpen(false)}>Razzl</RLink>
         <button id="burger" aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open} onClick={() => setOpen(!open)}><span />{open ? "Close" : "Menu"}</button>

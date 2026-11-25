@@ -17,7 +17,7 @@ export default function Home() {
     S.p = 0; S.show = 0;
     const ctx = gsap.context(() => {
       // Pinned, scrubbed scroll roll: four flavours, one steady upright bottle.
-      gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=450%", pin: true, scrub: 1.2 } });
+      gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=600%", pin: true, scrub: 1.6 } });
       ScrollTrigger.create({
         trigger: "#act2",
         start: "top top",

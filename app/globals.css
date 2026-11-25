@@ -603,3 +603,44 @@ select option{color:#30263A;background:#FFF8EC}
   #hero .letter-motion{animation-duration:5.6s}
 }
 @media(prefers-reduced-motion:reduce){#hero .letter-motion{animation:none}}
+
+
+/* Site-wide motion and responsive layering pass. */
+@keyframes razzlButtonNudge{
+  0%,100%{transform:translateX(0)}
+  28%{transform:translateX(3px)}
+  62%{transform:translateX(-2px)}
+}
+@media(hover:hover) and (pointer:fine){
+  .btn:hover{animation:razzlButtonNudge .58s ease-in-out}
+}
+@media(hover:none){
+  .btn:active{transform:translateX(2px) scale(.99)}
+}
+
+/* Desktop-only falling brand marks: a quiet single-colour atmospheric layer. */
+#brand-rain{
+  position:fixed;inset:0;z-index:3;overflow:hidden;pointer-events:none;
+  color:#00A64F;opacity:.22;
+}
+#brand-rain span{
+  position:absolute;top:-12vh;left:var(--x);font-size:var(--size);
+  line-height:1;animation:brandMarkFall var(--duration) linear var(--delay) infinite;
+  transform:translate3d(0,-12vh,0) rotate(0deg);will-change:transform;
+}
+@keyframes brandMarkFall{
+  0%{transform:translate3d(0,-12vh,0) rotate(0deg)}
+  50%{transform:translate3d(22px,52vh,0) rotate(150deg)}
+  100%{transform:translate3d(-12px,116vh,0) rotate(310deg)}
+}
+@media(max-width:800px){#brand-rain{display:none}}
+@media(prefers-reduced-motion:reduce){
+  #brand-rain{display:none}
+  .btn:hover{animation:none}
+}
+
+/* The dedicated flavour inspection page reserves a clean visual stage for the bottle. */
+@media(max-width:800px){
+  body[data-route="/flavours"] .flavour-page{padding-top:calc(49svh + env(safe-area-inset-top,0px))}
+  body[data-route="/flavours"] .flavour-page .flavour-copy{position:relative;z-index:6}
+}
