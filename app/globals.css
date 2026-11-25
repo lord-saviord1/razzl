@@ -628,8 +628,6 @@ select option{color:#30263A;background:#FFF8EC}
   line-height:1;animation:brandMarkFall var(--duration) linear var(--delay) infinite;
   transform:translate3d(0,-12vh,0) rotate(0deg);will-change:transform;
 }
-#brand-rain span:nth-child(3n){font-size:calc(var(--size)*.72)}
-#brand-rain span:nth-child(4n){font-size:calc(var(--size)*1.18)}
 @keyframes brandMarkFall{
   0%{transform:translate3d(0,-12vh,0) rotate(0deg)}
   50%{transform:translate3d(22px,52vh,0) rotate(150deg)}
