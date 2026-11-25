@@ -295,7 +295,7 @@ function Bottle() {
     G.rotation.x = damp(G.rotation.x, 0, ease);
     G.rotation.z = damp(G.rotation.z, tz + (route === "/flavours" && motion.mode !== "idle" ? -motion.outDir * 0.10 : 0), ease);
     G.position.x = damp(G.position.x, targetX, 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
-    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.04, ease);
+    G.position.y = damp(G.position.y, tgt.y, ease);
     const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
     const sc = damp(G.scale.x, tgt.s * (mob ? 2.72 : 3.18) * tgt.show * small, visibilityEase);
@@ -401,9 +401,8 @@ function Bubbles() {
   const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, hh = Math.tan(20 * DEG) * 8, hw = hh * (st.size.width / st.size.height), wx = st.pointer.x * hw, wy = st.pointer.y * hh;
-    const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
     for (let i = 0; i < N; i++) {
-      const b = data[i]; b.y += b.v * boost; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
+      const b = data[i]; b.y += b.v; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
       const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
       if (di < 2) { const fo = (2 - di) * 0.03; b.vx += (dx / (di || 1)) * fo; b.vy += (dy / (di || 1)) * fo; }
       b.vx *= 0.94; b.vy *= 0.94;
