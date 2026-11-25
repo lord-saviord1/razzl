@@ -7,6 +7,7 @@ export default function Company() {
       <h1 className="display o-l">Ultimum</h1>
       <p className="lead serif o-l">A fast-growing food and beverage manufacturer.</p>
       <p>Ultimum Limited is headquartered in Lagos, with its manufacturing centre in Osisioma, Aba, Abia State, Nigeria. It operates as a member of the Kadji Group of Companies, a diversified and well-established business conglomerate in Africa with over 50 years of heritage.</p>
+      <p className="section-intro">Behind every bottle is a team focused on bringing refreshing drinks to more people, with a growing presence across Nigeria.</p>
       <div className="grid">
         <div className="glass card"><b>Lagos</b><p>Headquarters.</p></div>
         <div className="glass card"><b>Aba</b><p>Manufacturing centre in Osisioma, Abia State.</p></div>
