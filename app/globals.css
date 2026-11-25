@@ -421,3 +421,42 @@ select option{color:#30263A;background:#FFF8EC}
   .panel{max-height:42svh}
   .panel .tl{font-size:17px}
 }
+
+
+/* Consistent foreground/background pairings on the light Jochebed-inspired surfaces. */
+.page h1,.page h2,.sec h2{color:var(--j-deep);text-shadow:none}
+.page .eyebrow,.sec .eyebrow{color:var(--j-amethyst);opacity:1}
+
+/* Product and information panels: warm cream surface, deep-amethyst copy. */
+.panel.glass,.card.glass,.promo.glass{
+  background:rgba(255,248,236,.96);
+  color:var(--j-deep);
+  border:0;
+  box-shadow:0 14px 38px rgba(59,25,80,.10);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+}
+.panel.glass h2,.panel.glass .tl,.panel.glass p,
+.card.glass b,.card.glass p,.card.glass .eyebrow,
+.promo.glass h2,.promo.glass h3,.promo.glass p,.promo.glass .eyebrow{
+  color:var(--j-deep)!important;
+  text-shadow:none;
+}
+.card.glass .chip,.promo.glass .chip,.panel.glass .chip{
+  color:var(--j-deep);
+  background:rgba(160,176,67,.16);
+  border:0;
+  border-bottom:2px solid var(--j-pear);
+}
+.card.glass .links a,.promo.glass .links a{
+  color:var(--j-amethyst);
+  border-bottom-color:rgba(123,60,152,.42);
+}
+.card.glass .links a:hover,.promo.glass .links a:hover{
+  color:var(--j-coral);
+  border-bottom-color:var(--j-coral);
+}
+@media(max-width:800px){
+  .panel.glass{max-height:44svh;overflow-y:auto}
+  .panel.glass p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+}
