@@ -20,7 +20,7 @@ export default function Home() {
       gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=450%", pin: true, scrub: 1.2 } });
       ScrollTrigger.create({
         trigger: "#act2",
-        start: "top bottom",
+        start: "top 82%",
         onEnter: () => { S.show = 1; },
         onEnterBack: () => { S.show = 1; },
         onLeaveBack: () => { S.show = 0; }

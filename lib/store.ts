@@ -21,7 +21,7 @@ export const FL: Flavor[] = [
 
 // Mutable animation state shared between the DOM (GSAP) and the persistent WebGL stage.
 export const S: any = {
-  route: "/", flavor: 0, p: 0, act1: 0, show: 1, pop: 0, burst: 0,
+  route: "/", flavor: 0, p: 0, act1: 0, show: 0, pop: 0, burst: 0,
   mx: 0, my: 0, drag: 0, size60: true, spillOn: false,
   mouth: new THREE.Vector3(), bottlePos: new THREE.Vector3(), glow: 1, dir: new THREE.Vector3(0, 1, 0),
   listeners: new Set<() => void>(), go: null as null | ((href: string) => void),
