@@ -644,3 +644,17 @@ select option{color:#30263A;background:#FFF8EC}
   body[data-route="/flavours"] .flavour-page{padding-top:calc(49svh + env(safe-area-inset-top,0px))}
   body[data-route="/flavours"] .flavour-page .flavour-copy{position:relative;z-index:6}
 }
+
+
+/* Shared responsive safeguards retained from the earlier audit. */
+.page{overflow-x:clip}
+.page>*{min-width:0}
+.page img,.promo-img{max-width:100%;height:auto}
+.page form{width:100%}
+.page form button{min-height:48px}
+@media(max-width:800px){
+  .page .promo,.page .grid,.page .split{min-width:0;max-width:100%}
+  .page .promo-img{width:100%;object-fit:contain}
+  .page .links a{min-height:36px;display:inline-flex;align-items:center}
+  .page .chips .btn{max-width:100%;white-space:normal}
+}
