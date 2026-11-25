@@ -637,3 +637,52 @@ select option{color:#30263A;background:#FFF8EC}
 @media(prefers-reduced-motion:reduce){
   .btn{animation:none;will-change:auto}
 }
+
+
+/* Desktop-only falling 2D marks: one Razzl palette colour, kept behind copy. */
+.brand-fall{display:none}
+@media(min-width:801px) and (prefers-reduced-motion:no-preference){
+  .brand-fall{
+    display:block;position:fixed;inset:0;z-index:4;overflow:hidden;
+    pointer-events:none;color:#00A64F;opacity:.34;
+  }
+  .brand-fall__mark{
+    position:absolute;top:-12vh;display:block;
+    font:700 clamp(18px,2vw,30px)/1 sans-serif;
+    color:#00A64F;text-shadow:0 2px 10px rgba(0,166,79,.12);
+    animation:brandMarkFall linear infinite;
+  }
+  .mark-1{left:5%;animation-duration:19s;animation-delay:-7s}
+  .mark-2{left:14%;font-size:22px;animation-duration:24s;animation-delay:-17s}
+  .mark-3{left:25%;animation-duration:21s;animation-delay:-11s}
+  .mark-4{left:37%;font-size:25px;animation-duration:26s;animation-delay:-20s}
+  .mark-5{left:49%;animation-duration:18s;animation-delay:-4s}
+  .mark-6{left:61%;font-size:18px;animation-duration:23s;animation-delay:-14s}
+  .mark-7{left:72%;animation-duration:20s;animation-delay:-9s}
+  .mark-8{left:82%;font-size:25px;animation-duration:27s;animation-delay:-22s}
+  .mark-9{left:91%;animation-duration:22s;animation-delay:-12s}
+  .mark-10{left:31%;font-size:20px;animation-duration:25s;animation-delay:-18s}
+  .mark-11{left:56%;animation-duration:20s;animation-delay:-8s}
+  .mark-12{left:77%;font-size:22px;animation-duration:24s;animation-delay:-16s}
+}
+@keyframes brandMarkFall{
+  0%{transform:translate3d(0,-12vh,0) rotate(0deg);opacity:0}
+  12%{opacity:.8}
+  50%{transform:translate3d(22px,55vh,0) rotate(150deg)}
+  88%{opacity:.55}
+  100%{transform:translate3d(-14px,118vh,0) rotate(300deg);opacity:0}
+}
+.page{overflow-x:clip}
+.page>*{min-width:0}
+.page img,.promo-img{max-width:100%;height:auto}
+.page form{width:100%}
+.page form button{min-height:48px}
+@media(max-width:800px){
+  .brand-fall{display:none!important}
+  .page{overflow-x:clip}
+  .page .promo,.page .grid,.page .split{min-width:0;max-width:100%}
+  .page .promo-img{width:100%;object-fit:contain}
+  .page .links a{min-height:36px;display:inline-flex;align-items:center}
+  .page .chips .btn{max-width:100%;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){.brand-fall{display:none!important}}
