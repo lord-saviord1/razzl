@@ -21,7 +21,6 @@ export default function Lineup() {
         <p>{f.desc}</p>
         <div className="chips" style={{ margin: "18px 0" }}><span className="chip">{f.size}</span><span className="chip">{f.kcal}</span><span className="chip">{f.sugar}</span>{i === 3 && <span className="chip">8% grapefruit juice</span>}</div>
         <div className="chips">{FL.map((x, k) => (<button key={x.key} className="btn ghost" style={k === i ? { background: "#fff", color: "#07050d" } : {}} onClick={() => setFlavor(k)}>{x.name}</button>))}</div>
-        <div style={{ marginTop: 18 }}><button className="btn mag" onClick={() => { S.pop = 1; S.burst = 45; }}>Shake it</button></div>
         <div className="glass card" style={{ marginTop: 26 }}><b>{c.name}</b><p>{c.bio}</p></div>
       </div>
     </main>
