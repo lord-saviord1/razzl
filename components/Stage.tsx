@@ -11,7 +11,7 @@ useGLTF.preload("/models/bottle.glb");
 const damp = (a: number, b: number, k: number) => a + (b - a) * k;
 const DEG = Math.PI / 180;
 
-// Four spill cycles pinned by GSAP: rotation -18deg -> +115deg, then back. Flavour switches at the 75deg tip.
+// Soft particle texture used by the bottle lighting and splash layer.
 const softTex = () => {
   const c = document.createElement("canvas"); c.width = c.height = 256;
   const x = c.getContext("2d")!, g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
