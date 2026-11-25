@@ -33,6 +33,7 @@ export default function Home() {
     <main>
       <section id="hero" className="act hero">
         <span className="eyebrow">Fresh · Youthful · Bubbly</span>
+        <div className="hero-photo"><img src="/razzl-hero.webp" alt="Razzl drinks bottles chilled on ice" fetchPriority="high" /></div>
         <div className="wm"><Letters text="Razzl" /></div>
         <p className="sub serif o-l">Your World! Explore our refreshing variants.</p>
         <div className="chips" style={{ marginBottom: 6 }}>
