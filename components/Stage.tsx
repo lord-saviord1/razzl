@@ -11,13 +11,7 @@ useGLTF.preload("/models/bottle.glb");
 const damp = (a: number, b: number, k: number) => a + (b - a) * k;
 const DEG = Math.PI / 180;
 
-// Four spill cycles pinned by GSAP: rotation -18deg -> +115deg, then back. Flavour switches at the 75deg tip.
-function homeAngle(p: number) {
-  const x = Math.min(0.9999, Math.max(0, p)) * 4, c = Math.min(3, Math.floor(x)), q = x - c;
-  const ang = q < 0.85 ? -18 + 133 * (q / 0.85) : 115 - 133 * ((q - 0.85) / 0.15);
-  return { ang, flavor: Math.min(3, c + (q > 0.594 ? 1 : 0)) };
-}
-
+// Soft particle texture used by the bottle lighting and splash layer.
 const softTex = () => {
   const c = document.createElement("canvas"); c.width = c.height = 256;
   const x = c.getContext("2d")!, g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
@@ -242,16 +236,17 @@ function Bottle() {
     const hideEase = 1 - Math.exp(-dt * 16);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.15, show: 1 };
     if (route === "/") {
-      const { ang, flavor } = S.p <= 0 ? { ang: -18, flavor: 0 } : homeAngle(S.p);
-      tz = -ang * DEG; setFlavor(flavor);
-      tgt = { x: mob ? 0 : Math.min(2.35, halfW * 0.55), y: mob ? 0.9 : 0, s: 1.1, show: S.show };
-    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.8 : 0.1, s: 1.38, show: 1 };
+      const progress = Math.min(0.9999, Math.max(0, S.p));
+      const flavor = Math.min(3, Math.floor(progress * 4));
+      // Scroll advances the flavour; the bottle stays upright and keeps turning.
+      tz = 0; setFlavor(flavor, false);
+      tgt = { x: mob ? 0 : Math.min(1.75, halfW * 0.4), y: mob ? 0.15 : -0.12, s: 1.0, show: S.show };
+    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.45 : 0.1, s: 1.18, show: 1 }; }
     else tgt.show = 0;
-    S.pop = Math.max(0, S.pop - dt * 0.9); tz -= Math.sin(S.pop * Math.PI) * 1.9;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
-    const targetYaw = route === "/flavours" ? t * 0.28 + S.drag : t * 0.38 + Math.sin(t * 0.7) * 0.16 + S.mx * 0.28;
+    const targetYaw = route === "/flavours" ? t * 0.34 + S.drag : t * 0.52;
     const fi = S.flavor, motion = flavorMotion.current;
     const applyFlavour = (index: number) => {
       const f = FL[index];
@@ -297,13 +292,13 @@ function Bottle() {
       motion.mode = "idle"; motion.rotY = damp(motion.rotY, 0, ease);
     }
     G.rotation.y = damp(G.rotation.y, targetYaw + motion.rotY, ease);
-    G.rotation.x = damp(G.rotation.x, S.my * 7 * DEG, ease);
-    G.rotation.z = damp(G.rotation.z, tz + (route === "/flavours" && motion.mode !== "idle" ? -motion.outDir * 0.10 : 0), ease);
+    G.rotation.x = damp(G.rotation.x, 0, ease);
+    G.rotation.z = damp(G.rotation.z, tz, ease);
     G.position.x = damp(G.position.x, targetX, 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
-    G.position.y = damp(G.position.y, tgt.y + Math.sin(t * 1.15) * 0.04, ease);
+    G.position.y = damp(G.position.y, tgt.y, ease);
     const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 0.94 : 1) * 3.9 * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 2.72 : 3.18) * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc));
     // Visibility is route-gated as well as scale-gated: the persistent WebGL
     // stage must never leak the bottle into the homepage hero before ScrollTrigger reveals it.
@@ -311,7 +306,7 @@ function Bottle() {
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, visibilityEase);
     // The cap, liquid and label are updated together at the off-screen handoff.
     mouth.current.getWorldPosition(S.mouth); S.dir.set(0, 1, 0).applyQuaternion(G.quaternion);
-    const on = Math.abs(G.rotation.z) > 75 * DEG && G.visible;
+    const on = false;
     if (on !== S.spillOn) { S.spillOn = on; emit(); }
   });
   return (
@@ -406,9 +401,8 @@ function Bubbles() {
   const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, hh = Math.tan(20 * DEG) * 8, hw = hh * (st.size.width / st.size.height), wx = st.pointer.x * hw, wy = st.pointer.y * hh;
-    const boost = 1 + Math.abs(Math.sin(S.pop * Math.PI)) * 2.5;
     for (let i = 0; i < N; i++) {
-      const b = data[i]; b.y += b.v * boost; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
+      const b = data[i]; b.y += b.v; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
       const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
       if (di < 2) { const fo = (2 - di) * 0.03; b.vx += (dx / (di || 1)) * fo; b.vy += (dy / (di || 1)) * fo; }
       b.vx *= 0.94; b.vy *= 0.94;

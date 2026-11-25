@@ -7,7 +7,7 @@ export default function Culture() {
     <main className="page">
       <span className="eyebrow">Culture</span>
       <h1 className="display o-l">Razzl<br />socials</h1>
-      <p className="lead serif o-l">What the brand is posting right now.</p>
+      <p className="lead serif o-l">Campaigns, challenges and moments from the Razzl community.</p>
 
       <section className="glass promo">
         <div>

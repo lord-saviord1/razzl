@@ -9,14 +9,14 @@ import { LINKS } from "@/lib/social";
 import Letters from "@/components/Letters";
 
 export default function Home() {
-  const { f, i, spill } = useFlavor();
+  const { f, i } = useFlavor();
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     // Keep the opening hero clear for the real Razzl product photograph.
     // Reveal the existing 3D bottle as the pinned flavour experience enters.
     S.p = 0; S.show = 0;
     const ctx = gsap.context(() => {
-      // Pinned, scrubbed tilt and spill: four flavours, one pour each
+      // Pinned, scrubbed scroll roll: four flavours, one steady upright bottle.
       gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=450%", pin: true, scrub: 1.2 } });
       ScrollTrigger.create({
         trigger: "#act2",
@@ -40,17 +40,17 @@ export default function Home() {
           <RLink href="/flavours" className="btn mag">Explore flavours</RLink>
           <RLink href="/culture" className="btn ghost mag">See the culture</RLink>
         </div>
+        <a className="scroll-cue" href="#act2" aria-label="Scroll to explore the four flavours"><span>Scroll to explore</span><i aria-hidden="true">&#8595;</i></a>
       </section>
 
       <section id="act2" className="act">
-        <div className={"story" + (spill ? " on" : "")}><span className="o-l">Crisp. Tart. Unapologetic.</span></div>
+        
         <div className="panel glass">
-          <span className="eyebrow">Tilt &amp; spill · {i + 1}/4</span>
+          <span className="eyebrow">The flavour roll · {i + 1}/4</span>
           <h2 className="o-l">{f.name}</h2>
           <div className="tl serif o-l">{f.line}</div>
           <p>{f.desc}</p>
           <div className="chips"><span className="chip">{f.size}</span><span className="chip">{f.kcal}</span><span className="chip">{f.sugar}</span></div>
-          <button className="btn mag" style={{ marginTop: 16 }} onClick={() => { S.pop = 1; S.burst = 30; }}>Shake it</button>
         </div>
       </section>
 

@@ -29,7 +29,7 @@ export const S: any = {
 
 export const emit = () => S.listeners.forEach((f: any) => f());
 
-export function setFlavor(i: number, burst = true) {
+export function setFlavor(i: number, burst = false) {
   if (i === S.flavor) return;
   S.flavor = i;
   if (burst) S.burst = 45;
