@@ -307,7 +307,7 @@ function Bottle() {
     G.scale.setScalar(Math.max(0.0001, sc));
     // Visibility is route-gated as well as scale-gated: the persistent WebGL
     // stage must never leak the bottle into the homepage hero before ScrollTrigger reveals it.
-    G.visible = route === "/" ? (S.show > 0.5 && sc > 0.02) : route === "/flavours" && sc > 0.02;
+    G.visible = route === "/" ? (S.show > 0.5 && S.p > 0.015 && sc > 0.02) : route === "/flavours" && sc > 0.02;
     S.bottlePos.copy(G.position); S.glow = damp(S.glow, tgt.show, visibilityEase);
     // The cap, liquid and label are updated together at the off-screen handoff.
     mouth.current.getWorldPosition(S.mouth); S.dir.set(0, 1, 0).applyQuaternion(G.quaternion);
