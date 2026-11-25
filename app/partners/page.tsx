@@ -6,6 +6,7 @@ export default function Partners() {
       <span className="eyebrow">Strategic Partners</span>
       <h1 className="display o-l">Partners</h1>
       <p className="lead serif o-l">Football, culture and community.</p>
+      <p className="section-intro">From football moments to local activations, partnerships help Razzl meet people where their interests and communities already are.</p>
       <div className="grid">
         <div className="glass card"><b>AFCON</b><p>Razzl was the exclusive official soft drink of the 2023 Africa Cup of Nations and was named official soft drink again for the 2024 edition.</p></div>
         <div className="glass card"><b>Culture</b><p>Razzl City Tour and RazzlxBole Fest put the brand in markets, campuses and communities.</p></div>

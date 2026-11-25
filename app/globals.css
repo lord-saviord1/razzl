@@ -589,3 +589,17 @@ select option{color:#30263A;background:#FFF8EC}
 .story{transform:none!important;rotate:0deg}
 .story.on{transform:none!important}
 @media(max-width:800px){.chip{font-size:11px}.card{padding:20px}.promo{padding:22px;gap:22px}}
+
+
+/* Brand wordmark: restore the gentle, almost imperceptible living motion. */
+#hero .letter-motion{display:inline-block;transform-origin:50% 65%;animation:razzlWordFloat 4.8s ease-in-out infinite}
+@keyframes razzlWordFloat{0%,100%{transform:translate3d(0,0,0) rotate(0deg);text-shadow:0 4px 22px rgba(20,8,18,.34)}50%{transform:translate3d(0,-4px,0) rotate(-.45deg);text-shadow:0 8px 27px rgba(20,8,18,.38)}}
+.flavour-copy{min-width:0;width:100%}
+.flavour-copy h1{max-width:100%;width:100%;overflow-wrap:anywhere;text-wrap:pretty}
+@media(max-width:800px){
+  .flavour-copy{padding-right:2px}
+  .flavour-copy h1{font-size:clamp(30px,9vw,54px)!important;line-height:1.02}
+  .flavour-copy .chips{gap:8px;flex-wrap:wrap}
+  #hero .letter-motion{animation-duration:5.6s}
+}
+@media(prefers-reduced-motion:reduce){#hero .letter-motion{animation:none}}

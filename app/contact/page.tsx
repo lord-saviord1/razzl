@@ -7,6 +7,7 @@ export default function Contact() {
       <span className="eyebrow">Contact Us</span>
       <h1 className="display o-l">Say hello</h1>
       <p className="lead serif o-l">Distributors, sponsorships, merch drops.</p>
+      <p className="section-intro">Have a distribution enquiry, an event idea or a question about Razzl? Send a note and tell us what you have in mind.</p>
       <form onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
         <input placeholder="Name" required aria-label="Name" />
         <input type="email" placeholder="Email" required aria-label="Email" />

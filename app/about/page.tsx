@@ -8,6 +8,7 @@ export default function About() {
       <span className="eyebrow">About Razzl</span>
       <h1 className="display o-l">Our brand</h1>
       <p className="lead serif o-l">Fresh, youthful, vibrant, dynamic, bubbly and expressive.</p>
+      <p className="section-intro">A drink brand built around flavour, personality and the freedom to show up as yourself.</p>
       <p>We support the aspirations of the youth of Nigeria, and their desire for self-expression and to be heard. Razzl is for those who are youthful in body or mind, go-getters aspiring to better their lives, energetic, dynamic people full of the youthful joy of life.</p>
       <div className="chips" style={{ marginTop: 20 }}>{["Bright", "Bubbly", "Colourful", "Fresh", "Modern", "Explosive", "Young"].map((w) => <span key={w} className="chip">{w}</span>)}</div>
       <div className="grid">

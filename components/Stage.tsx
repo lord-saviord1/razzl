@@ -230,23 +230,23 @@ function Bottle() {
   }, []);
 
   useFrame((st, dt) => {
-    const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
+    const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp, homeProgress = Math.min(0.9999, Math.max(0, S.p));
     // Frame-rate independent easing keeps the model's motion consistent across devices.
     const ease = 1 - Math.exp(-dt * 7.5);
     const hideEase = 1 - Math.exp(-dt * 16);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.15, show: 1 };
     if (route === "/") {
-      const progress = Math.min(0.9999, Math.max(0, S.p));
-      const flavor = Math.min(3, Math.floor(progress * 4));
+      const flavor = Math.min(3, Math.floor(homeProgress * 4));
       // Scroll advances the flavour; the bottle stays upright and keeps turning.
       tz = 0; setFlavor(flavor, false);
-      tgt = { x: mob ? 0 : Math.min(1.75, halfW * 0.4), y: mob ? 0.15 : -0.12, s: 1.0, show: S.show };
+      tgt = { x: mob ? 0 : Math.min(1.55, halfW * 0.36), y: mob ? 0.12 : -0.08, s: 1.12, show: S.show };
     } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.45 : 0.1, s: 1.18, show: 1 }; }
     else tgt.show = 0;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
-    const targetYaw = route === "/flavours" ? t * 0.34 + S.drag : t * 0.52;
+    const segmentProgress = Math.min(1, Math.max(0, homeProgress * 4 - Math.floor(homeProgress * 4)));
+    const targetYaw = route === "/flavours" ? t * 0.34 + S.drag : t * 0.12 + segmentProgress * Math.PI * 2;
     const fi = S.flavor, motion = flavorMotion.current;
     const applyFlavour = (index: number) => {
       const f = FL[index];
@@ -294,11 +294,11 @@ function Bottle() {
     G.rotation.y = damp(G.rotation.y, targetYaw + motion.rotY, ease);
     G.rotation.x = damp(G.rotation.x, 0, ease);
     G.rotation.z = damp(G.rotation.z, tz, ease);
-    G.position.x = damp(G.position.x, targetX, 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
-    G.position.y = damp(G.position.y, tgt.y, ease);
+    G.position.x = damp(G.position.x, targetX + (route === "/" ? Math.sin(t * 0.62) * (mob ? 0.045 : 0.11) : 0), 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
+    G.position.y = damp(G.position.y, tgt.y + (route === "/" ? Math.sin(t * 0.9) * (mob ? 0.055 : 0.13) : 0), ease);
     const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 2.72 : 3.18) * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? 3.02 : 3.72) * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc));
     // Visibility is route-gated as well as scale-gated: the persistent WebGL
     // stage must never leak the bottle into the homepage hero before ScrollTrigger reveals it.
