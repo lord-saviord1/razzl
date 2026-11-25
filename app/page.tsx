@@ -16,7 +16,7 @@ export default function Home() {
     // Reveal the existing 3D bottle as the pinned flavour experience enters.
     S.p = 0; S.show = 0;
     const ctx = gsap.context(() => {
-      // Pinned, scrubbed tilt and spill: four flavours, one pour each
+      // Pinned, scrubbed scroll roll: four flavours, one steady upright bottle.
       gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=450%", pin: true, scrub: 1.2 } });
       ScrollTrigger.create({
         trigger: "#act2",
