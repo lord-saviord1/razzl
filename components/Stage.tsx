@@ -241,7 +241,7 @@ function Bottle() {
       // Scroll advances the flavour; the bottle stays upright and keeps turning.
       tz = 0; setFlavor(flavor, false);
       tgt = { x: mob ? 0 : Math.min(1.75, halfW * 0.4), y: mob ? 0.15 : -0.12, s: 1.0, show: S.show };
-    } else if (route === "/flavours") tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.45 : 0.1, s: 1.18, show: 1 };
+    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.45 : 0.1, s: 1.18, show: 1 }; }
     else tgt.show = 0;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
@@ -293,7 +293,7 @@ function Bottle() {
     }
     G.rotation.y = damp(G.rotation.y, targetYaw + motion.rotY, ease);
     G.rotation.x = damp(G.rotation.x, 0, ease);
-    G.rotation.z = damp(G.rotation.z, tz + (route === "/flavours" && motion.mode !== "idle" ? -motion.outDir * 0.10 : 0), ease);
+    G.rotation.z = damp(G.rotation.z, tz, ease);
     G.position.x = damp(G.position.x, targetX, 1 - Math.exp(-dt * (motion.mode === "out" ? 6.5 : motion.mode === "in" ? 5.5 : 7.5)));
     G.position.y = damp(G.position.y, tgt.y, ease);
     const small = fi === 3 ? 0.9 : 1;
