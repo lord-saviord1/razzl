@@ -1,5 +1,5 @@
 "use client";
-import { FL, S, setFlavor } from "@/lib/store";
+import { FL, setFlavor } from "@/lib/store";
 import { useFlavor } from "@/components/Shell";
 import { CHARACTERS } from "@/lib/characters";
 
