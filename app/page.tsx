@@ -9,7 +9,7 @@ import { LINKS } from "@/lib/social";
 import Letters from "@/components/Letters";
 
 export default function Home() {
-  const { f, i, spill } = useFlavor();
+  const { f, i } = useFlavor();
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     // Keep the opening hero clear for the real Razzl product photograph.
@@ -40,11 +40,11 @@ export default function Home() {
           <RLink href="/flavours" className="btn mag">Explore flavours</RLink>
           <RLink href="/culture" className="btn ghost mag">See the culture</RLink>
         </div>
-        <a className="scroll-cue" href="#act2" aria-label="Scroll to explore the four flavours"><span>Scroll to explore</span><i aria-hidden="true">v</i></a>
+        <a className="scroll-cue" href="#act2" aria-label="Scroll to explore the four flavours"><span>Scroll to explore</span><i aria-hidden="true">&#8595;</i></a>
       </section>
 
       <section id="act2" className="act">
-        <div className={"story" + (spill ? " on" : "")}><span className="o-l">One bottle. Four ways to Razzl.</span></div>
+        
         <div className="panel glass">
           <span className="eyebrow">The flavour roll · {i + 1}/4</span>
           <h2 className="o-l">{f.name}</h2>
