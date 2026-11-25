@@ -12,12 +12,6 @@ const damp = (a: number, b: number, k: number) => a + (b - a) * k;
 const DEG = Math.PI / 180;
 
 // Four spill cycles pinned by GSAP: rotation -18deg -> +115deg, then back. Flavour switches at the 75deg tip.
-function homeAngle(p: number) {
-  const x = Math.min(0.9999, Math.max(0, p)) * 4, c = Math.min(3, Math.floor(x)), q = x - c;
-  const ang = q < 0.85 ? -18 + 133 * (q / 0.85) : 115 - 133 * ((q - 0.85) / 0.15);
-  return { ang, flavor: Math.min(3, c + (q > 0.594 ? 1 : 0)) };
-}
-
 const softTex = () => {
   const c = document.createElement("canvas"); c.width = c.height = 256;
   const x = c.getContext("2d")!, g = x.createRadialGradient(128, 128, 0, 128, 128, 128);
