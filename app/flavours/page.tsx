@@ -13,7 +13,7 @@ export default function Lineup() {
         <span className="eyebrow">Flavours</span>
         <h1
           className="display o-l"
-          style={isLongName ? { fontSize: "clamp(34px, 5.2vw, 76px)", letterSpacing: "-0.03em" } : undefined}
+          style={isLongName ? { fontSize: "clamp(32px, 5.2vw, 76px)", letterSpacing: "-0.03em", maxWidth: "100%", whiteSpace: "nowrap" } : undefined}
         >
           {f.name}
         </h1>
