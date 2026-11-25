@@ -603,3 +603,37 @@ select option{color:#30263A;background:#FFF8EC}
   #hero .letter-motion{animation-duration:5.6s}
 }
 @media(prefers-reduced-motion:reduce){#hero .letter-motion{animation:none}}
+
+
+/* Site-wide responsive audit: reserve a clear product zone above flavour copy. */
+@media(max-width:800px){
+  body[data-route="/flavours"] .page.flavours-page{
+    padding-top:clamp(270px,42svh,390px);
+    padding-bottom:calc(70px + env(safe-area-inset-bottom,0px));
+    min-height:100svh;
+  }
+  body[data-route="/flavours"] .flavour-copy{
+    position:relative;
+    z-index:2;
+    max-width:100%;
+  }
+  body[data-route="/flavours"] .flavour-copy .glass.card{
+    margin-top:20px;
+  }
+}
+@media(min-width:801px){
+  body[data-route="/flavours"] .flavour-copy{max-width:min(44vw,620px)!important}
+}
+.btn{
+  animation:razzlButtonDrift 7.2s ease-in-out infinite;
+  will-change:transform;
+}
+.btn:nth-child(2n){animation-delay:-3.6s}
+@keyframes razzlButtonDrift{
+  0%,100%{transform:translate3d(-2px,0,0)}
+  50%{transform:translate3d(2px,-1px,0)}
+}
+.btn:hover,.btn:focus-visible{transform:translate3d(4px,-2px,0)}
+@media(prefers-reduced-motion:reduce){
+  .btn{animation:none;will-change:auto}
+}
