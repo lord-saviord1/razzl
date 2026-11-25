@@ -12,10 +12,19 @@ export default function Home() {
   const { f, i, spill } = useFlavor();
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    S.p = 0; S.show = 1;
+    // Keep the opening hero clear for the real Razzl product photograph.
+    // Reveal the existing 3D bottle as the pinned flavour experience enters.
+    S.p = 0; S.show = 0;
     const ctx = gsap.context(() => {
       // Pinned, scrubbed tilt and spill: four flavours, one pour each
       gsap.to(S, { p: 1, ease: "none", scrollTrigger: { trigger: "#act2", start: "top top", end: "+=450%", pin: true, scrub: 1.2 } });
+      ScrollTrigger.create({
+        trigger: "#act2",
+        start: "top bottom",
+        onEnter: () => { S.show = 1; },
+        onEnterBack: () => { S.show = 1; },
+        onLeaveBack: () => { S.show = 0; }
+      });
       ScrollTrigger.create({ trigger: "#after", start: "top 70%", onEnter: () => { S.show = 0; }, onLeaveBack: () => { S.show = 1; } });
     });
     return () => ctx.revert();
