@@ -8,7 +8,7 @@ export default function Lineup() {
   const c = CHARACTERS[f.key];
   const isLongName = f.name.length >= 10;
   return (
-    <main className="page" data-drag style={{ touchAction: "pan-y" }}>
+    <main className="page flavour-page" data-drag style={{ touchAction: "pan-y" }}>
       <div className="flavour-copy" style={{ width: "100%", maxWidth: 680, minWidth: 0 }}>
         <span className="eyebrow">Flavours</span>
         <h1
