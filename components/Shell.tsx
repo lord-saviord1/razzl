@@ -50,7 +50,9 @@ export default function Shell({ children }: { children: React.ReactNode }) {
     S.spillOn = false;
     S.pop = 0;
     S.burst = 0;
-    S.show = path === "/" || path === "/flavours" ? 1 : 0;
+    // The homepage reveals its bottle only when the pinned flavour section enters.
+    // The dedicated flavours route keeps the bottle visible immediately.
+    S.show = path === "/flavours" ? 1 : 0;
 
     // A drag offset belongs to the flavour inspection page, not the next route.
     if (path !== "/flavours") S.drag = 0;
