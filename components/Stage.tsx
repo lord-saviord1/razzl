@@ -230,14 +230,13 @@ function Bottle() {
   }, []);
 
   useFrame((st, dt) => {
-    const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp;
+    const t = st.clock.elapsedTime, asp = st.size.width / st.size.height, mob = st.size.width < 800, route = S.route, halfW = 2.91 * asp, homeProgress = Math.min(0.9999, Math.max(0, S.p));
     // Frame-rate independent easing keeps the model's motion consistent across devices.
     const ease = 1 - Math.exp(-dt * 7.5);
     const hideEase = 1 - Math.exp(-dt * 16);
     let tz = -0.1, tgt = { x: 0, y: 0, s: 1.15, show: 1 };
     if (route === "/") {
-      const progress = Math.min(0.9999, Math.max(0, S.p));
-      const flavor = Math.min(3, Math.floor(progress * 4));
+      const flavor = Math.min(3, Math.floor(homeProgress * 4));
       // Scroll advances the flavour; the bottle stays upright and keeps turning.
       tz = 0; setFlavor(flavor, false);
       tgt = { x: mob ? 0 : Math.min(1.55, halfW * 0.36), y: mob ? 0.12 : -0.08, s: 1.12, show: S.show };
@@ -246,7 +245,7 @@ function Bottle() {
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
     // A little more axial turn reveals the bottle's 3D shape; keep the idle bob restrained.
-    const segmentProgress = Math.min(1, Math.max(0, progress * 4 - Math.floor(progress * 4)));
+    const segmentProgress = Math.min(1, Math.max(0, homeProgress * 4 - Math.floor(homeProgress * 4)));
     const targetYaw = route === "/flavours" ? t * 0.34 + S.drag : t * 0.12 + segmentProgress * Math.PI * 2;
     const fi = S.flavor, motion = flavorMotion.current;
     const applyFlavour = (index: number) => {
