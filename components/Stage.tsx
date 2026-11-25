@@ -240,7 +240,7 @@ function Bottle() {
       // Scroll advances the flavour; the bottle stays upright and keeps turning.
       tz = 0; setFlavor(flavor, false);
       tgt = { x: mob ? 0 : Math.min(1.55, halfW * 0.36), y: mob ? 0.12 : -0.08, s: 1.12, show: S.show };
-    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 0.45 : 0.1, s: 1.18, show: 1 }; }
+    } else if (route === "/flavours") { tz = 0; tgt = { x: mob ? 0 : Math.min(2.2, halfW * 0.5), y: mob ? 1.35 : 0.1, s: 1.18, show: 1 }; }
     else tgt.show = 0;
     const G = g.current;
     G.rotation.z = damp(G.rotation.z, tz, ease);
@@ -261,12 +261,12 @@ function Bottle() {
       if (motion.mode === "idle" && fi !== motion.last) {
         motion.mode = "out"; motion.pending = fi;
         motion.outDir = G.position.x >= 0 ? 1 : -1;
-        motion.omega = 3.8;
+        motion.omega = 1.8;
       }
       if (motion.mode === "out") {
         motion.pending = fi;
         targetX = motion.outDir * (halfW + 2.1);
-        motion.omega = Math.min(12, motion.omega + 34 * dt);
+        motion.omega = Math.min(5.8, motion.omega + 11 * dt);
         motion.rotY += motion.outDir * motion.omega * dt;
         if (Math.abs(G.position.x) > halfW + 1.25) {
           applyFlavour(motion.pending);
@@ -279,7 +279,7 @@ function Bottle() {
         }
       } else if (motion.mode === "in") {
         targetX = tgt.x;
-        motion.rotY = damp(motion.rotY, motion.rotTarget, 1 - Math.exp(-dt * 5.5));
+        motion.rotY = damp(motion.rotY, motion.rotTarget, 1 - Math.exp(-dt * 3.8));
         if (Math.abs(G.position.x - tgt.x) < 0.12 && Math.abs(motion.rotTarget - motion.rotY) < 0.08) {
           motion.mode = "idle"; motion.rotY = 0;
         }
@@ -298,7 +298,7 @@ function Bottle() {
     G.position.y = damp(G.position.y, tgt.y + (route === "/" ? Math.sin(t * 0.9) * (mob ? 0.055 : 0.13) : 0), ease);
     const small = fi === 3 ? 0.9 : 1;
     const visibilityEase = tgt.show === 0 ? hideEase : ease;
-    const sc = damp(G.scale.x, tgt.s * (mob ? 3.02 : 3.72) * tgt.show * small, visibilityEase);
+    const sc = damp(G.scale.x, tgt.s * (mob ? (route === "/flavours" ? 2.35 : 3.02) : 3.72) * tgt.show * small, visibilityEase);
     G.scale.setScalar(Math.max(0.0001, sc));
     // Visibility is route-gated as well as scale-gated: the persistent WebGL
     // stage must never leak the bottle into the homepage hero before ScrollTrigger reveals it.
@@ -396,17 +396,17 @@ void main(){
 }`;
 
 function Bubbles() {
-  const N = 30, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
-  const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 11, z: -1 + Math.random() * 2.5, v: 0.006 + Math.random() * 0.014, s: 0.1 + Math.random() * 0.42, ph: Math.random() * 6.28, vx: 0, vy: 0 })), []);
+  const N = 42, ref = useRef<THREE.InstancedMesh>(null!), d = useMemo(() => new THREE.Object3D(), []);
+  const data = useMemo(() => Array.from({ length: N }, () => ({ x: (Math.random() - 0.5) * 16, y: (Math.random() - 0.5) * 11, z: -1 + Math.random() * 2.5, v: 0.009 + Math.random() * 0.022, s: 0.1 + Math.random() * 0.42, ph: Math.random() * 6.28, vx: 0, vy: 0 })), []);
   const mat = useMemo(() => new THREE.ShaderMaterial({ vertexShader: vert, fragmentShader: frag, transparent: true, depthWrite: false }), []);
   useFrame((st) => {
     const t = st.clock.elapsedTime, hh = Math.tan(20 * DEG) * 8, hw = hh * (st.size.width / st.size.height), wx = st.pointer.x * hw, wy = st.pointer.y * hh;
     for (let i = 0; i < N; i++) {
       const b = data[i]; b.y += b.v; if (b.y > 6.2) { b.y = -6.2; b.x = (Math.random() - 0.5) * 16; b.vx = b.vy = 0; }
-      const sx = b.x + Math.sin(t * 1.1 + b.ph) * 0.35, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
-      if (di < 2) { const fo = (2 - di) * 0.03; b.vx += (dx / (di || 1)) * fo; b.vy += (dy / (di || 1)) * fo; }
+      const sx = b.x + Math.sin(t * 1.4 + b.ph) * 0.68, dx = sx + b.vx - wx, dy = b.y + b.vy - wy, di = Math.hypot(dx, dy);
+      if (di < 2.4) { const fo = (2.4 - di) * 0.045; b.vx += (dx / (di || 1)) * fo; b.vy += (dy / (di || 1)) * fo; }
       b.vx *= 0.94; b.vy *= 0.94;
-      d.position.set(sx + b.vx, b.y + b.vy, b.z); d.scale.setScalar(b.s * (1 + Math.sin(t * 3 + b.ph) * 0.05)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
+      d.position.set(sx + b.vx, b.y + b.vy, b.z); d.scale.setScalar(b.s * (1 + Math.sin(t * 3.4 + b.ph) * 0.09)); d.updateMatrix(); ref.current.setMatrixAt(i, d.matrix);
     }
     ref.current.instanceMatrix.needsUpdate = true;
   });
