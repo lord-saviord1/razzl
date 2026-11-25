@@ -643,6 +643,6 @@ select option{color:#30263A;background:#FFF8EC}
 
 /* The dedicated flavour inspection page reserves a clean visual stage for the bottle. */
 @media(max-width:800px){
-  body[data-route="/flavours"] .flavour-page{padding-top:calc(48svh + env(safe-area-inset-top,0px))}
+  body[data-route="/flavours"] .flavour-page{padding-top:calc(49svh + env(safe-area-inset-top,0px))}
   body[data-route="/flavours"] .flavour-page .flavour-copy{position:relative;z-index:6}
 }
